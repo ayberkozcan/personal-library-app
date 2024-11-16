@@ -1,3 +1,4 @@
+import os
 from tkinter import *
 from tkinter import messagebox
 import sqlite3
@@ -14,6 +15,9 @@ class Library(ctk.CTk):
 
         self.current_theme = "dark"
         
+        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+        self.add_icon_path = os.path.join(BASE_DIR, "icons/add_icon.png")
+
         self.attributes = ["Book Name", "Author Name", "Publication Year", "Publisher", "Genre", "ISBN"]
 
         self.entries = {}
@@ -47,51 +51,83 @@ class Library(ctk.CTk):
         for widget in self.winfo_children():
             widget.grid_forget()
 
+        header = ctk.CTkLabel(
+            self,
+            text="Library",
+            font=("Arial", 24, "bold")
+        )
+        header.grid(row=0, column=0, padx=20, pady=20)
+
+        self.cursor.execute("SELECT * FROM books")
+        books = self.cursor.fetchall()
+
+        if not books:
+            no_books_label = ctk.CTkLabel(self, text="No books...")
+            no_books_label.grid(row=1, column=0, padx=20, pady=10)
+        else:
+            for i, book in enumerate(books, start=1):
+                book_info = f"{book[1]} by {book[2]} ({book[3]})"
+                book_label = ctk.CTkLabel(self, text=book_info)
+                book_label.grid(row=i+1, column=0, padx=20, pady=5)
+
+        add_icon = PhotoImage(file=self.add_icon_path)
+        add_icon = add_icon.subsample(10, 10)
+
         self.add_book_button = ctk.CTkButton(
             self,
-            text="Add",
+            image=add_icon,
+            text="",
             command=self.add_book_page,
-            fg_color="green"
+            height=35,
+            width=35,
+            fg_color="transparent",
+            hover=None
         )
 
-        self.add_book_button.grid(row=0, column=0, padx=10, pady=10)
+        self.add_book_button.grid(row=len(books)+2, column=0, padx=20, pady=10)
 
     def add_book_page(self):
         for widget in self.winfo_children():
             widget.grid_forget()
-        
+
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+
+        center_frame = ctk.CTkFrame(self)
+        center_frame.grid(row=0, column=0, padx=20, pady=20)
+
         header = ctk.CTkLabel(
-            self,
+            center_frame,
             text="Add a Book",
             font=("Arial", 24, "bold")
         )
-        header.grid(row=0, column=1, pady=20)
+        header.grid(row=0, column=0, columnspan=2, pady=20)
 
         for i, attr in enumerate(self.attributes):
-            self.create_label_and_entry(attr, row=i+1)
+            self.create_label_and_entry_in_frame(center_frame, attr, row=i+1)
 
         save_button = ctk.CTkButton(
-            self,
+            center_frame,
             text="Save Book",
             command=self.save_book,
-            fg_color="blue"
+            fg_color="darkgreen"
         )
-        save_button.grid(row=len(self.attributes)+1, column=1, padx=10, pady=10)
-        
+        save_button.grid(row=len(self.attributes)+1, column=0, columnspan=2, padx=10, pady=10)
+
         back_button = ctk.CTkButton(
-            self,
+            center_frame,
             text="Back",
             command=self.homepage,
-            fg_color="red"
+            fg_color="darkred"
         )
-        back_button.grid(row=len(self.attributes)+2, column=1, padx=10, pady=10)
+        back_button.grid(row=len(self.attributes)+2, column=0, columnspan=2, padx=10, pady=10)
 
-    def create_label_and_entry(self, text, row):
-        label = ctk.CTkLabel(self, text=text)
-        label.grid(row=row, column=0, padx=10, pady=10)
+    def create_label_and_entry_in_frame(self, frame, text, row):
+        label = ctk.CTkLabel(frame, text=text)
+        label.grid(row=row, column=0, padx=10, pady=10, sticky="e")
 
-        entry = ctk.CTkEntry(self, placeholder_text="...",)
-        entry.grid(row=row, column=1, padx=10, pady=10)
+        entry = ctk.CTkEntry(frame, placeholder_text="...")
+        entry.grid(row=row, column=1, padx=10, pady=10, sticky="w")
 
         self.entries[text] = entry
 
