@@ -17,8 +17,9 @@ class Library(ctk.CTk):
         
         BASE_DIR = os.path.dirname(os.path.abspath(__file__))
         self.add_icon_path = os.path.join(BASE_DIR, "icons/add_icon.png")
+        self.delete_icon_path = os.path.join(BASE_DIR, "icons/delete_icon.png")
 
-        self.attributes = ["Book Name", "Author Name", "Publication Year", "Publisher", "Genre", "ISBN"]
+        self.attributes = ["Name", "Author", "Publication Year", "Publisher", "Genre", "ISBN", "Page Count", "Pages Read", "Status"]
 
         self.entries = {}
 
@@ -38,7 +39,10 @@ class Library(ctk.CTk):
                 publication_year INTEGER,
                 publisher TEXT,
                 genre TEXT,
-                isbn TEXT
+                isbn TEXT,
+                page_count INTEGER,
+                pages_read INTEGER DEFAULT 0,
+                status TEXT DEFAULT 'Ready to Start'
             )
         """)
         self.conn.commit()
@@ -51,10 +55,13 @@ class Library(ctk.CTk):
         for widget in self.winfo_children():
             widget.grid_forget()
 
+        self.grid_rowconfigure(0, weight=0)
+        self.grid_columnconfigure(0, weight=0)
+
         header = ctk.CTkLabel(
             self,
             text="Library",
-            font=("Arial", 24, "bold")
+            font=("Arial", 36, "bold")
         )
         header.grid(row=0, column=0, padx=20, pady=20)
 
@@ -65,10 +72,46 @@ class Library(ctk.CTk):
             no_books_label = ctk.CTkLabel(self, text="No books...")
             no_books_label.grid(row=1, column=0, padx=20, pady=10)
         else:
+            center_frame = ctk.CTkFrame(self)
+            center_frame.grid(row=2, column=0, columnspan=10, padx=20, pady=20)
+
+            book_no_title = ctk.CTkLabel(center_frame, text="#", font=("Arial", 24))
+            book_no_title.grid(row=2, column=0, padx=10, pady=5)
+
+            indexes_to_pass = []
+
+            for i, title_name in enumerate(self.attributes):
+                if title_name in ["Publication Year", "Publisher", "ISBN"]:
+                    indexes_to_pass.append(i)
+                    continue
+                title = ctk.CTkLabel(center_frame, text=title_name, font=("Arial", 24))
+                title.grid(row=2, column=i+1, padx=10, pady=5)
+
             for i, book in enumerate(books, start=1):
-                book_info = f"{book[1]} by {book[2]} ({book[3]})"
-                book_label = ctk.CTkLabel(self, text=book_info)
-                book_label.grid(row=i+1, column=0, padx=20, pady=5)
+                index = ctk.CTkLabel(center_frame, text=i, font=("Arial", 12))
+                index.grid(row=i+2, column=0, padx=10, pady=5)
+
+                for j, attribute in enumerate(book[1:], start=1):
+                    if j-1 in indexes_to_pass:
+                        continue
+                    attribute_label = ctk.CTkLabel(center_frame, text=attribute, font=("Arial", 12))
+                    attribute_label.grid(row=i+2, column=j, padx=10, pady=5)
+
+                delete_icon = PhotoImage(file=self.delete_icon_path)
+                delete_icon = delete_icon.subsample(20, 20)
+
+                delete_button = ctk.CTkButton(
+                    center_frame,
+                    image=delete_icon,
+                    text="",
+                    command=lambda book_id=book[0]: self.delete_book(book_id),
+                    fg_color="red",
+                    hover_color="darkred",
+                    width=20,
+                    height=20,
+                    corner_radius=10
+                )
+                delete_button.grid(row=i+2, column=j+1, padx=10, pady=5)
 
         add_icon = PhotoImage(file=self.add_icon_path)
         add_icon = add_icon.subsample(10, 10)
@@ -84,7 +127,7 @@ class Library(ctk.CTk):
             hover=None
         )
 
-        self.add_book_button.grid(row=len(books)+2, column=0, padx=20, pady=10)
+        self.add_book_button.grid(row=len(books)+3, column=0, padx=20, pady=10)
 
     def add_book_page(self):
         for widget in self.winfo_children():
@@ -103,7 +146,7 @@ class Library(ctk.CTk):
         )
         header.grid(row=0, column=0, columnspan=2, pady=20)
 
-        for i, attr in enumerate(self.attributes):
+        for i, attr in enumerate(self.attributes[:7]):
             self.create_label_and_entry_in_frame(center_frame, attr, row=i+1)
 
         save_button = ctk.CTkButton(
@@ -143,22 +186,39 @@ class Library(ctk.CTk):
         if not isbn.isdigit():
             messagebox.showerror("Invalid Input", "ISBN must be a valid Integer.")
             return
-
+        
+        page_count = book_data["Page Count"]
+        if not page_count.isdigit():
+            messagebox.showerror("Invalid Input", "Page Count must be a valid Integer.")
+            return
+        
         self.cursor.execute("""
-            INSERT INTO books (book_name, author_name, publication_year, publisher, genre, isbn)
-            VALUES (:book_name, :author_name, :publication_year, :publisher, :genre, :isbn)
+            INSERT INTO books (book_name, author_name, publication_year, publisher, genre, isbn, page_count)
+            VALUES (:book_name, :author_name, :publication_year, :publisher, :genre, :isbn, :page_count)
         """, {
-            "book_name": book_data["Book Name"],
-            "author_name": book_data["Author Name"],
+            "book_name": book_data["Name"],
+            "author_name": book_data["Author"],
             "publication_year": book_data["Publication Year"],
             "publisher": book_data["Publisher"],
             "genre": book_data["Genre"],
-            "isbn": book_data["ISBN"]
+            "isbn": book_data["ISBN"],
+            "page_count": book_data["Page Count"]
         })
         self.conn.commit()
 
+        messagebox.showinfo("Success", "Book saved.")
+
         for entry in self.entries.values():
             entry.delete(0, END)
+
+    def delete_book(self, book_id):
+        confirm = messagebox.askyesno("Delete Book", "Are you sure you want to delete this book?")
+
+        if confirm:
+            self.cursor.execute("DELETE FROM books WHERE id = ?", (book_id,))
+            self.conn.commit()
+            messagebox.showinfo("Success", "Book deleted successfully.")
+            self.homepage()
 
     def _del_(self):
         if hasattr(self, 'conn'):
