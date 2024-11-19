@@ -16,6 +16,7 @@ class Library(ctk.CTk):
         self.current_theme = "dark"
         
         BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+        self.theme_icon_path = os.path.join(BASE_DIR, "icons/theme_icon.png")
         self.add_icon_path = os.path.join(BASE_DIR, "icons/add_icon.png")
         self.delete_icon_path = os.path.join(BASE_DIR, "icons/delete_icon.png")
 
@@ -64,6 +65,21 @@ class Library(ctk.CTk):
             font=("Arial", 36, "bold")
         )
         header.grid(row=0, column=0, padx=20, pady=20)
+
+        theme_icon = PhotoImage(file=self.theme_icon_path)
+        theme_icon = theme_icon.subsample(10, 10)
+
+        self.switch_theme_button = ctk.CTkButton(
+            self,
+            text="",
+            image=theme_icon,
+            command=self.switch_theme,
+            height=60,
+            width=60,
+            fg_color="transparent",
+            hover=None
+        )
+        self.switch_theme_button.grid(row=0, column=10, padx=20, pady=20)
 
         self.cursor.execute("SELECT * FROM books")
         books = self.cursor.fetchall()
@@ -219,6 +235,14 @@ class Library(ctk.CTk):
             self.conn.commit()
             messagebox.showinfo("Success", "Book deleted successfully.")
             self.homepage()
+
+    def switch_theme(self):
+        if self.current_theme == "dark":
+            ctk.set_appearance_mode("light")
+            self.current_theme = "light"
+        else:
+            ctk.set_appearance_mode("dark")
+            self.current_theme = "dark"
 
     def _del_(self):
         if hasattr(self, 'conn'):
