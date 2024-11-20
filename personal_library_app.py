@@ -56,6 +56,40 @@ class Library(ctk.CTk):
         for widget in self.winfo_children():
             widget.grid_forget()
 
+        header = ctk.CTkLabel(
+            self,
+            text="Library",
+            font=("Arial", 36, "bold")
+        )
+        header.grid(row=0, column=0, padx=20, pady=20)
+
+        self.library_page_button = ctk.CTkButton(
+            self,
+            # image=library_icon,
+            text="My Library",
+            command=self.library_page,
+        )
+        self.library_page_button.grid(row=0, column=10, padx=20, pady=20)
+
+        add_icon = PhotoImage(file=self.add_icon_path)
+        add_icon = add_icon.subsample(10, 10)
+
+        self.add_pages_button = ctk.CTkButton(
+            self,
+            image=add_icon,
+            text="",
+            # command=self.add_pages_page,
+            height=100,
+            width=100,
+            fg_color="transparent",
+            hover=None
+        )
+        self.add_pages_button.grid(row=1, column=1, padx=10, pady=10)
+
+    def library_page(self):
+        for widget in self.winfo_children():
+            widget.grid_forget()
+
         self.grid_rowconfigure(0, weight=0)
         self.grid_columnconfigure(0, weight=0)
 
@@ -66,20 +100,28 @@ class Library(ctk.CTk):
         )
         header.grid(row=0, column=0, padx=20, pady=20)
 
-        theme_icon = PhotoImage(file=self.theme_icon_path)
-        theme_icon = theme_icon.subsample(10, 10)
+        # theme_icon = PhotoImage(file=self.theme_icon_path)
+        # theme_icon = theme_icon.subsample(10, 10)
 
-        self.switch_theme_button = ctk.CTkButton(
+        # self.switch_theme_button = ctk.CTkButton(
+        #     self,
+        #     text="",
+        #     image=theme_icon,
+        #     command=self.switch_theme,
+        #     height=60,
+        #     width=60,
+        #     fg_color="transparent",
+        #     hover=None
+        # )
+        # self.switch_theme_button.grid(row=0, column=10, padx=20, pady=20)
+
+        self.homepage_button = ctk.CTkButton(
             self,
-            text="",
-            image=theme_icon,
-            command=self.switch_theme,
-            height=60,
-            width=60,
-            fg_color="transparent",
-            hover=None
+            # image="homepage_icon",
+            text="Back to Homepage",
+            command=self.homepage
         )
-        self.switch_theme_button.grid(row=0, column=10, padx=20, pady=20)
+        self.homepage_button.grid(row=0, column=10, padx=20, pady=20)
 
         self.cursor.execute("SELECT * FROM books")
         books = self.cursor.fetchall()
@@ -176,7 +218,7 @@ class Library(ctk.CTk):
         back_button = ctk.CTkButton(
             center_frame,
             text="Back",
-            command=self.homepage,
+            command=self.library_page,
             fg_color="darkred"
         )
         back_button.grid(row=len(self.attributes)+2, column=0, columnspan=2, padx=10, pady=10)
@@ -234,7 +276,7 @@ class Library(ctk.CTk):
             self.cursor.execute("DELETE FROM books WHERE id = ?", (book_id,))
             self.conn.commit()
             messagebox.showinfo("Success", "Book deleted successfully.")
-            self.homepage()
+            self.library_page()
 
     def switch_theme(self):
         if self.current_theme == "dark":
