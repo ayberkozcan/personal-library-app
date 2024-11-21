@@ -7,7 +7,7 @@ Book Management
 * Store detailed information about each book, including the author, genre, publication year, and page count.
 
 Reading Progress Tracking
-* Track the number of pages read daily.
+* Track the number of pages read daily and analyze your progress.
 * Monitor the reading status of your books:
 * Ready to Start: The book has not been started.
 * In Progress: The book is being read.
