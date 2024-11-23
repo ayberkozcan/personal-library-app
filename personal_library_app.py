@@ -12,14 +12,16 @@ class Library(ctk.CTk):
         self.geometry("1000x800")
         self.title("My Library")
 
-        ctk.set_default_color_theme("dark-blue")
+        settings = self.load_settings()
+        self.current_theme = settings.get("theme")
+        self.current_color = settings.get("color")
+        self.language = settings.get("language")
 
-        self.language = "en"
+        ctk.set_appearance_mode(self.current_theme)
+        ctk.set_default_color_theme(self.current_color)
         self.load_language(self.language)
 
         self.widget_texts = {} 
-
-        self.current_theme = "dark"
         
         BASE_DIR = os.path.dirname(os.path.abspath(__file__))
         self.theme_icon_path = os.path.join(BASE_DIR, "icons/theme_icon.png")
@@ -34,8 +36,15 @@ class Library(ctk.CTk):
 
         self.widgets()
 
+    def load_settings(self):
+        try:
+            with open("data/settings.json", "r") as file:
+                return json.load(file)
+        except FileNotFoundError:
+            return {"theme": "dark", "color": "dark-blue", "language": "en"}
+
     def connect_database(self):
-        self.conn = sqlite3.connect("data/db/library.db")
+        self.conn = sqlite3.connect("data/database/library.db")
         self.cursor = self.conn.cursor()
 
         self.cursor.execute("""
@@ -55,7 +64,6 @@ class Library(ctk.CTk):
         self.conn.commit()
 
     def widgets(self):
-        # Homepage
         self.homepage()
 
     def homepage(self):
@@ -79,43 +87,43 @@ class Library(ctk.CTk):
         main_frame.grid_columnconfigure(3, weight=2)
         main_frame.grid_columnconfigure(4, weight=2)
 
-        header = ctk.CTkLabel(
+        self.widget_texts["homepage_header"] = ctk.CTkLabel(
             main_frame,
-            text="My Library",
+            text=self.get_text("homepage_header"),
             font=("Arial", 36, "bold")
         )
-        header.grid(row=0, column=0, padx=20, pady=20, sticky="nw")
+        self.widget_texts["homepage_header"].grid(row=0, column=0, padx=20, pady=20, sticky="nw")
 
-        self.library_page_button = ctk.CTkButton(
+        self.widget_texts["library_page_button"] = ctk.CTkButton(
             main_frame,
             # image=library_icon,
-            text="My Library",
+            text=self.get_text("library_page_button"),
             command=self.library_page,
         )
-        self.library_page_button.grid(row=0, column=2, padx=20, pady=20, sticky="ne")
+        self.widget_texts["library_page_button"].grid(row=0, column=2, padx=20, pady=20, sticky="ne")
 
-        self.stats_button = ctk.CTkButton(
+        self.widget_texts["stats_button"] = ctk.CTkButton(
             main_frame,
             # image=stats_icon,
-            text="Stats",
+            text=self.get_text("stats_button"),
             command=self.stats_page,
         )
-        self.stats_button.grid(row=0, column=3, padx=20, pady=20, sticky="ne")
+        self.widget_texts["stats_button"].grid(row=0, column=3, padx=20, pady=20, sticky="ne")
 
-        self.settings_button = ctk.CTkButton(
+        self.widget_texts["settings_button"] = ctk.CTkButton(
             main_frame,
             # image=settings_icon,
-            text="Settings",
+            text=self.get_text("settings_button"),
             command=self.settings_page,
         )
-        self.settings_button.grid(row=0, column=4, padx=20, pady=20, sticky="ne")
+        self.widget_texts["settings_button"].grid(row=0, column=4, padx=20, pady=20, sticky="ne")
 
-        self.page_question_label = ctk.CTkLabel(
+        self.widget_texts["page_question_label"] = ctk.CTkLabel(
             main_frame,
-            text="How many pages have you read today?",
+            text=self.get_text("page_question_label"),
             font=("Arial", 20, "italic")
         )
-        self.page_question_label.grid(row=1, column=1, columnspan=3, padx=20, pady=5, sticky="nsew")
+        self.widget_texts["page_question_label"].grid(row=1, column=1, columnspan=3, padx=20, pady=5, sticky="nsew")
 
         add_icon = PhotoImage(file=self.add_icon_path)
         add_icon = add_icon.subsample(10, 10)
@@ -130,12 +138,12 @@ class Library(ctk.CTk):
         )
         self.add_pages_button.grid(row=2, column=1, columnspan=3, padx=20, pady=5, sticky="nsew")
 
-        self.information_label = ctk.CTkLabel(
+        self.widget_texts["information_label"] = ctk.CTkLabel(
             main_frame,
-            text="Last time, you were on page x of the book x.",
+            text=self.get_text("information_label"),
             font=("Arial", 20)
         )
-        self.information_label.grid(row=3, column=1, columnspan=3, padx=20, pady=20, sticky="nsew")
+        self.widget_texts["information_label"].grid(row=3, column=1, columnspan=3, padx=20, pady=20, sticky="nsew")
 
     def library_page(self):
         for widget in self.winfo_children():
@@ -151,24 +159,28 @@ class Library(ctk.CTk):
         main_frame.grid_rowconfigure(1, weight=1)
         main_frame.grid_columnconfigure(0, weight=1)
 
-        header = ctk.CTkLabel(
+        self.widget_texts["library_header"] = ctk.CTkLabel(
             main_frame,
-            text="Library",
+            text=self.get_text("library_header"),
             font=("Arial", 36, "bold")
         )
-        header.grid(row=0, column=0, padx=20, pady=20, sticky="nw")
+        self.widget_texts["library_header"].grid(row=0, column=0, padx=20, pady=20, sticky="nw")
 
-        self.homepage_button = ctk.CTkButton(
+        self.widget_texts["homepage_button"] = ctk.CTkButton(
             main_frame,
-            text="Back to Homepage",
+            text=self.get_text("homepage_button"),
             command=self.homepage
         )
-        self.homepage_button.grid(row=0, column=1, padx=20, pady=20, sticky="ne")
+        self.widget_texts["homepage_button"].grid(row=0, column=1, padx=20, pady=20, sticky="ne")
 
         center_frame = ctk.CTkFrame(main_frame)
         center_frame.grid(row=1, column=0, columnspan=2, sticky="nsew", padx=20, pady=20)
 
-        book_no_title = ctk.CTkLabel(center_frame, text="#", font=("Arial", 24))
+        book_no_title = ctk.CTkLabel(
+            center_frame, 
+            text="#", 
+            font=("Arial", 24)
+        )
         book_no_title.grid(row=0, column=0, padx=10, pady=5)
 
         indexes_to_pass = []
@@ -177,15 +189,23 @@ class Library(ctk.CTk):
             if title_name in ["Publication Year", "Publisher", "ISBN"]:
                 indexes_to_pass.append(i)
                 continue
-            title = ctk.CTkLabel(center_frame, text=title_name, font=("Arial", 24))
+            title = ctk.CTkLabel(
+                center_frame, 
+                text=self.get_text(title_name), 
+                font=("Arial", 24)
+            )
             title.grid(row=0, column=i+1, padx=10, pady=5)
 
         self.cursor.execute("SELECT * FROM books")
         books = self.cursor.fetchall()
 
         if not books:
-            no_books_label = ctk.CTkLabel(center_frame, text="No books...")
-            no_books_label.grid(row=1, column=0, padx=20, pady=10)
+            self.widget_texts["no_books_label"] = ctk.CTkLabel(
+                center_frame, 
+                text=self.get_text("no_books_label"),
+                font=("Arial", 20, "italic")
+            )
+            self.widget_texts["no_books_label"].grid(row=1, column=0, padx=20, pady=10)
         else:
             for i, book in enumerate(books, start=1):
                 index = ctk.CTkLabel(center_frame, text=i, font=("Arial", 12))
@@ -242,19 +262,19 @@ class Library(ctk.CTk):
         main_frame.grid_rowconfigure(1, weight=1)
         main_frame.grid_columnconfigure(0, weight=1)
 
-        header = ctk.CTkLabel(
+        self.widget_texts["stats_header"] = ctk.CTkLabel(
             main_frame,
-            text="Statistics",
+            text=self.get_text("stats_header"),
             font=("Arial", 36, "bold")
         )
-        header.grid(row=0, column=0, padx=20, pady=20, sticky="nw")
+        self.widget_texts["stats_header"].grid(row=0, column=0, padx=20, pady=20, sticky="nw")
 
-        self.homepage_button = ctk.CTkButton(
+        self.widget_texts["homepage_button"] = ctk.CTkButton(
             main_frame,
-            text="Back to Homepage",
+            text=self.get_text("homepage_button"),
             command=self.homepage
         )
-        self.homepage_button.grid(row=0, column=1, padx=20, pady=20, sticky="ne")
+        self.widget_texts["homepage_button"].grid(row=0, column=1, padx=20, pady=20, sticky="ne")
 
     def settings_page(self):
         for widget in self.winfo_children():
@@ -285,26 +305,26 @@ class Library(ctk.CTk):
         main_frame.grid_columnconfigure(8, weight=2)
         main_frame.grid_columnconfigure(9, weight=2)
 
-        header = ctk.CTkLabel(
+        self.widget_texts["settings_header"] = ctk.CTkLabel(
             main_frame,
-            text="Settings",
+            text=self.get_text("settings_header"),
             font=("Arial", 36, "bold")
         )
-        header.grid(row=0, column=0, padx=20, pady=20, sticky="nw")
+        self.widget_texts["settings_header"].grid(row=0, column=0, padx=20, pady=20, sticky="nw")
 
-        self.homepage_button = ctk.CTkButton(
+        self.widget_texts["homepage_button"] = ctk.CTkButton(
             main_frame,
-            text="Back to Homepage",
+            text=self.get_text("homepage_button"),
             command=self.homepage
         )
-        self.homepage_button.grid(row=0, column=9, padx=20, pady=20, sticky="ne")
+        self.widget_texts["homepage_button"].grid(row=0, column=9, padx=20, pady=20, sticky="ne")
 
-        set_theme_color_label = ctk.CTkLabel(
+        self.widget_texts["set_theme_color_label"] = ctk.CTkLabel(
             main_frame,
-            text="Theme & Color",
+            text=self.get_text("set_theme_color_label"),
             font=("Arial", 24)
         )
-        set_theme_color_label.grid(row=1, column=0, padx=20, pady=(20, 0), sticky="w")
+        self.widget_texts["set_theme_color_label"].grid(row=1, column=0, padx=20, pady=(20, 0), sticky="w")
 
         themes = [
             {"text": "Dark", "theme": "dark"},
@@ -312,12 +332,12 @@ class Library(ctk.CTk):
             {"text": "System", "theme": "system"}
         ]
 
-        theme_label = ctk.CTkLabel(
+        self.widget_texts["theme_label"] = ctk.CTkLabel(
             main_frame,
-            text="Theme",
+            text=self.get_text("theme_label"),
             font=("Arial", 20)
         )
-        theme_label.grid(row=2, column=0, padx=20, pady=0, sticky="w")
+        self.widget_texts["theme_label"].grid(row=2, column=0, padx=20, pady=0, sticky="w")
 
         for index, theme in enumerate(themes):
             theme_button = ctk.CTkButton(
@@ -335,12 +355,12 @@ class Library(ctk.CTk):
             {"text": "Green", "color": "green"},
         ]
 
-        color_label = ctk.CTkLabel(
+        self.widget_texts["color_label"] = ctk.CTkLabel(
             main_frame,
             text="Color",
             font=("Arial", 20)
         )
-        color_label.grid(row=3, column=0, padx=20, pady=0, sticky="w")
+        self.widget_texts["color_label"].grid(row=3, column=0, padx=20, pady=0, sticky="w")
 
         for index, color in enumerate(colors):
             color_button = ctk.CTkButton(
@@ -352,12 +372,12 @@ class Library(ctk.CTk):
             )
             color_button.grid(row=3, column=index+1, padx=0, pady=0)
 
-        goals_label = ctk.CTkLabel(
+        self.widget_texts["goals_label"] = ctk.CTkLabel(
             main_frame,
-            text="Page Goals",
+            text=self.get_text("goals_label"),
             font=("Arial", 24)
         )
-        goals_label.grid(row=4, column=0, padx=20, pady=0, sticky="w")
+        self.widget_texts["goals_label"].grid(row=4, column=0, padx=20, pady=0, sticky="w")
 
         validate_cmd = (main_frame.register(self.validate_input), "%P")
 
@@ -415,35 +435,47 @@ class Library(ctk.CTk):
         # )
         # header.grid(row=0, column=0, columnspan=2, pady=20)
 
-        pages_label = ctk.CTkLabel(center_frame, text="Pages")
-        pages_label.grid(row=0, column=0, padx=10, pady=10, sticky="e")
+        self.widget_texts["pages_label"] = ctk.CTkLabel(
+            center_frame, 
+            text=self.get_text("pages_label"),
+        )
+        self.widget_texts["pages_label"].grid(row=0, column=0, padx=10, pady=10, sticky="e")
 
-        pages_entry = ctk.CTkEntry(center_frame, placeholder_text="...")
+        pages_entry = ctk.CTkEntry(
+            center_frame, 
+            placeholder_text="..."
+        )
         pages_entry.grid(row=0, column=1, padx=10, pady=10, sticky="w")
 
         book_list = self.get_books_from_db()
 
-        book_label = ctk.CTkLabel(center_frame, text="Book")
-        book_label.grid(row=1, column=0, padx=10, pady=10, sticky="e")
+        self.widget_texts["book_label"] = ctk.CTkLabel(
+            center_frame, 
+            text=self.get_text("book_label")
+        )
+        self.widget_texts["book_label"].grid(row=1, column=0, padx=10, pady=10, sticky="e")
 
-        book_combobox = ctk.CTkComboBox(center_frame, values=book_list)
+        book_combobox = ctk.CTkComboBox(
+            center_frame, 
+            values=book_list
+        )
         book_combobox.grid(row=1, column=1, padx=10, pady=10, sticky="w")
 
-        save_button = ctk.CTkButton(
+        self.widget_texts["save_record_button"] = ctk.CTkButton(
             center_frame,
-            text="Add Record",
+            text=self.get_text("save_record_button"),
             # command=self.save_book,
             fg_color="darkgreen"
         )
-        save_button.grid(row=2, column=0, columnspan=2, padx=10, pady=10)
+        self.widget_texts["save_record_button"].grid(row=2, column=0, columnspan=2, padx=10, pady=10)
 
-        back_button = ctk.CTkButton(
+        self.widget_texts["back_button"] = ctk.CTkButton(
             center_frame,
-            text="Back",
+            text=self.get_text("back_button"),
             command=self.homepage,
             fg_color="darkred"
         )
-        back_button.grid(row=3, column=0, columnspan=2, padx=10, pady=10)
+        self.widget_texts["back_button"].grid(row=3, column=0, columnspan=2, padx=10, pady=10)
 
     def add_book_page(self):
         for widget in self.winfo_children():
@@ -455,34 +487,34 @@ class Library(ctk.CTk):
         center_frame = ctk.CTkFrame(self)
         center_frame.grid(row=0, column=0, padx=20, pady=20)
 
-        header = ctk.CTkLabel(
+        self.widget_texts["add_book_header"] = ctk.CTkLabel(
             center_frame,
-            text="Add a Book",
+            text=self.get_text("add_book_header"),
             font=("Arial", 24, "bold")
         )
-        header.grid(row=0, column=0, columnspan=2, pady=20)
+        self.widget_texts["add_book_header"].grid(row=0, column=0, columnspan=2, pady=20)
 
         for i, attr in enumerate(self.attributes[:7]):
             self.create_label_and_entry_in_frame(center_frame, attr, row=i+1)
 
-        save_button = ctk.CTkButton(
+        self.widget_texts["save_book_button"] = ctk.CTkButton(
             center_frame,
-            text="Save Book",
+            text=self.get_text("save_book_button"),
             command=self.save_book,
             fg_color="darkgreen"
         )
-        save_button.grid(row=len(self.attributes)+1, column=0, columnspan=2, padx=10, pady=10)
+        self.widget_texts["save_book_button"].grid(row=len(self.attributes)+1, column=0, columnspan=2, padx=10, pady=10)
 
-        back_button = ctk.CTkButton(
+        self.widget_texts["back_button"] = ctk.CTkButton(
             center_frame,
-            text="Back",
+            text=self.get_text("back_button"),
             command=self.library_page,
             fg_color="darkred"
         )
-        back_button.grid(row=len(self.attributes)+2, column=0, columnspan=2, padx=10, pady=10)
+        self.widget_texts["back_button"].grid(row=len(self.attributes)+2, column=0, columnspan=2, padx=10, pady=10)
 
     def create_label_and_entry_in_frame(self, frame, text, row):
-        label = ctk.CTkLabel(frame, text=text)
+        label = ctk.CTkLabel(frame, text=self.get_text(text))
         label.grid(row=row, column=0, padx=10, pady=10, sticky="e")
 
         entry = ctk.CTkEntry(frame, placeholder_text="...")
@@ -495,17 +527,26 @@ class Library(ctk.CTk):
 
         publication_year = book_data["Publication Year"]
         if not publication_year.isdigit():
-            messagebox.showerror("Invalid Input", "Publication Year must be a valid Integer.")
+            messagebox.showerror(
+                self.get_text("error_title"),
+                self.get_text("error_publication_year")
+            )
             return
-        
+
         isbn = book_data["ISBN"]
         if not isbn.isdigit():
-            messagebox.showerror("Invalid Input", "ISBN must be a valid Integer.")
+            messagebox.showerror(
+                self.get_text("error_title"),
+                self.get_text("error_isbn")
+            )
             return
-        
+
         page_count = book_data["Page Count"]
         if not page_count.isdigit():
-            messagebox.showerror("Invalid Input", "Page Count must be a valid Integer.")
+            messagebox.showerror(
+                self.get_text("error_title"),
+                self.get_text("error_page_count")
+            )
             return
         
         self.cursor.execute("""
@@ -522,13 +563,16 @@ class Library(ctk.CTk):
         })
         self.conn.commit()
 
-        messagebox.showinfo("Success", "Book saved.")
+        messagebox.showinfo(
+            self.get_text("success_title"),
+            self.get_text("success_message")
+        )
 
         for entry in self.entries.values():
             entry.delete(0, END)
 
     def get_books_from_db(self):
-        conn = sqlite3.connect("data/db/library.db")
+        conn = sqlite3.connect("data/database/library.db")
         cursor = conn.cursor()
         
         cursor.execute("SELECT book_name FROM books")
@@ -539,12 +583,17 @@ class Library(ctk.CTk):
         return [book[0] for book in books]
 
     def delete_book(self, book_id):
-        confirm = messagebox.askyesno("Delete Book", "Are you sure you want to delete this book?")
+        title_confirm = self.get_text("delete_book_title")
+        message_confirm = self.get_text("delete_book_message")
+        title_success = self.get_text("delete_success_title")
+        message_success = self.get_text("delete_success_message")
+
+        confirm = messagebox.askyesno(title_confirm, message_confirm)
 
         if confirm:
             self.cursor.execute("DELETE FROM books WHERE id = ?", (book_id,))
             self.conn.commit()
-            messagebox.showinfo("Success", "Book deleted successfully.")
+            messagebox.showinfo(title_success, message_success)
             self.library_page()
 
     def validate_input(self, P):
@@ -556,8 +605,22 @@ class Library(ctk.CTk):
     def set_theme(self, theme):
         ctk.set_appearance_mode(theme)
 
+        settings = self.load_settings()
+        settings["theme"] = theme
+
+        with open("data/settings.json", "w") as file:
+            json.dump(settings, file, indent=4)
+        
+        self.current_theme = theme
+
     def set_color(self, color):
         ctk.set_default_color_theme(color)
+
+        settings = self.load_settings()
+        settings["color"] = color
+
+        with open("data/settings.json", "w") as file:
+            json.dump(settings, file, indent=4)
 
         return self.settings_page()
 
@@ -566,7 +629,7 @@ class Library(ctk.CTk):
             self.conn.close()
 
     def load_language(self, lang_code):
-        with open("data/languages/language.json", "r", encoding="utf-8") as file:
+        with open("data/localization/language.json", "r", encoding="utf-8") as file:
             self.languages = json.load(file)
         self.language = lang_code
 
