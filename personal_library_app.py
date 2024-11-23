@@ -3,6 +3,7 @@ from tkinter import *
 from tkinter import messagebox
 import sqlite3
 import customtkinter as ctk
+import json
 
 class Library(ctk.CTk):
     def __init__(self):
@@ -12,6 +13,11 @@ class Library(ctk.CTk):
         self.title("My Library")
 
         ctk.set_default_color_theme("dark-blue")
+
+        self.language = "en"
+        self.load_language(self.language)
+
+        self.widget_texts = {} 
 
         self.current_theme = "dark"
         
@@ -29,7 +35,7 @@ class Library(ctk.CTk):
         self.widgets()
 
     def connect_database(self):
-        self.conn = sqlite3.connect("library.db")
+        self.conn = sqlite3.connect("data/db/library.db")
         self.cursor = self.conn.cursor()
 
         self.cursor.execute("""
@@ -262,7 +268,22 @@ class Library(ctk.CTk):
 
         main_frame.grid_rowconfigure(0, weight=0)
         main_frame.grid_rowconfigure(1, weight=1)
+        main_frame.grid_rowconfigure(2, weight=1)
+        main_frame.grid_rowconfigure(3, weight=1)
+        main_frame.grid_rowconfigure(4, weight=1)
+        main_frame.grid_rowconfigure(5, weight=1)
+        main_frame.grid_rowconfigure(6, weight=1)
+        
         main_frame.grid_columnconfigure(0, weight=1)
+        main_frame.grid_columnconfigure(1, weight=2)
+        main_frame.grid_columnconfigure(2, weight=2)
+        main_frame.grid_columnconfigure(3, weight=2)
+        main_frame.grid_columnconfigure(4, weight=2)
+        main_frame.grid_columnconfigure(5, weight=2)
+        main_frame.grid_columnconfigure(6, weight=2)
+        main_frame.grid_columnconfigure(7, weight=2)
+        main_frame.grid_columnconfigure(8, weight=2)
+        main_frame.grid_columnconfigure(9, weight=2)
 
         header = ctk.CTkLabel(
             main_frame,
@@ -276,7 +297,106 @@ class Library(ctk.CTk):
             text="Back to Homepage",
             command=self.homepage
         )
-        self.homepage_button.grid(row=0, column=1, padx=20, pady=20, sticky="ne")
+        self.homepage_button.grid(row=0, column=9, padx=20, pady=20, sticky="ne")
+
+        set_theme_color_label = ctk.CTkLabel(
+            main_frame,
+            text="Theme & Color",
+            font=("Arial", 24)
+        )
+        set_theme_color_label.grid(row=1, column=0, padx=20, pady=(20, 0), sticky="w")
+
+        themes = [
+            {"text": "Dark", "theme": "dark"},
+            {"text": "Light", "theme": "light"},
+            {"text": "System", "theme": "system"}
+        ]
+
+        theme_label = ctk.CTkLabel(
+            main_frame,
+            text="Theme",
+            font=("Arial", 20)
+        )
+        theme_label.grid(row=2, column=0, padx=20, pady=0, sticky="w")
+
+        for index, theme in enumerate(themes):
+            theme_button = ctk.CTkButton(
+                main_frame,
+                text=theme["text"],
+                command=lambda theme=theme: self.set_theme(theme["theme"]),
+                width=30,
+                corner_radius=50
+            )
+            theme_button.grid(row=2, column=index+1, padx=0, pady=0)
+
+        colors = [
+            {"text": "Blue", "color": "blue"},
+            {"text": "Dark Blue", "color": "dark-blue"},
+            {"text": "Green", "color": "green"},
+        ]
+
+        color_label = ctk.CTkLabel(
+            main_frame,
+            text="Color",
+            font=("Arial", 20)
+        )
+        color_label.grid(row=3, column=0, padx=20, pady=0, sticky="w")
+
+        for index, color in enumerate(colors):
+            color_button = ctk.CTkButton(
+                main_frame,
+                text=color["text"],
+                command=lambda color=color: self.set_color(color["color"]),
+                width=30,
+                corner_radius=50
+            )
+            color_button.grid(row=3, column=index+1, padx=0, pady=0)
+
+        goals_label = ctk.CTkLabel(
+            main_frame,
+            text="Page Goals",
+            font=("Arial", 24)
+        )
+        goals_label.grid(row=4, column=0, padx=20, pady=0, sticky="w")
+
+        validate_cmd = (main_frame.register(self.validate_input), "%P")
+
+        self.widget_texts["daily_goal_label"] = ctk.CTkLabel(
+            main_frame,
+            text=self.get_text("daily_goal_label"),
+            font=("Arial", 20)
+        )
+        self.widget_texts["daily_goal_label"].grid(row=5, column=0, padx=20, pady=0, sticky="w")
+
+        daily_goal_entry = ctk.CTkEntry(
+            main_frame,
+            placeholder_text="...",
+            validate="key",
+            validatecommand=validate_cmd
+        )
+        daily_goal_entry.grid(row=5, column=1, columnspan=2, padx=20, pady=0, sticky="w")
+
+        self.widget_texts["weekly_goal_label"] = ctk.CTkLabel(
+            main_frame,
+            text=self.get_text("weekly_goal_label"),
+            font=("Arial", 20)
+        )
+        self.widget_texts["weekly_goal_label"].grid(row=6, column=0, padx=20, pady=0, sticky="w")
+        
+        weekly_goal_entry = ctk.CTkEntry(
+            main_frame,
+            placeholder_text="...",
+            validate="key",
+            validatecommand=validate_cmd
+        )
+        weekly_goal_entry.grid(row=6, column=1, columnspan=2, padx=20, pady=0, sticky="w")
+
+        self.widget_texts["change_language_button"] = ctk.CTkButton(
+            main_frame, 
+            text=self.get_text("change_language_button"), 
+            command=self.change_language
+        )
+        self.widget_texts["change_language_button"].grid(row=7, column=0, padx=20, pady=20)
 
     def add_pages_page(self):
         for widget in self.winfo_children():
@@ -408,7 +528,7 @@ class Library(ctk.CTk):
             entry.delete(0, END)
 
     def get_books_from_db(self):
-        conn = sqlite3.connect("library.db")
+        conn = sqlite3.connect("data/db/library.db")
         cursor = conn.cursor()
         
         cursor.execute("SELECT book_name FROM books")
@@ -427,17 +547,42 @@ class Library(ctk.CTk):
             messagebox.showinfo("Success", "Book deleted successfully.")
             self.library_page()
 
-    def switch_theme(self):
-        if self.current_theme == "dark":
-            ctk.set_appearance_mode("light")
-            self.current_theme = "light"
+    def validate_input(self, P):
+        if P == "" or (P.isdigit() and len(P) <= 4):
+            return True
         else:
-            ctk.set_appearance_mode("dark")
-            self.current_theme = "dark"
+            return False
+
+    def set_theme(self, theme):
+        ctk.set_appearance_mode(theme)
+
+    def set_color(self, color):
+        ctk.set_default_color_theme(color)
+
+        return self.settings_page()
 
     def _del_(self):
         if hasattr(self, 'conn'):
             self.conn.close()
+
+    def load_language(self, lang_code):
+        with open("data/languages/language.json", "r", encoding="utf-8") as file:
+            self.languages = json.load(file)
+        self.language = lang_code
+
+    def get_text(self, key):
+        return self.languages.get(self.language, {}).get(key, key)
+
+    def change_language(self):
+        if self.language == 'en':
+                    self.language = 'tr'
+        else:
+            self.language = 'en'
+
+        self.load_language(self.language)
+        
+        for widget_key, widget in self.widget_texts.items():
+            widget.configure(text=self.get_text(widget_key))
 
 if __name__ == "__main__":
     app = Library()
