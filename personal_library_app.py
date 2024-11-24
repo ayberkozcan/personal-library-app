@@ -24,9 +24,19 @@ class Library(ctk.CTk):
         self.widget_texts = {} 
         
         BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+        # Homepage
+        self.homepage_icon_path = os.path.join(BASE_DIR, "icons/homepage_icon.png")
+        self.library_icon_path = os.path.join(BASE_DIR, "icons/library_icon.png")
+        self.stats_icon_path = os.path.join(BASE_DIR, "icons/stats_icon.png")
+        self.settings_icon_path = os.path.join(BASE_DIR, "icons/settings_icon.png")
+
         self.theme_icon_path = os.path.join(BASE_DIR, "icons/theme_icon.png")
+
+        # Library
         self.add_icon_path = os.path.join(BASE_DIR, "icons/add_icon.png")
         self.delete_icon_path = os.path.join(BASE_DIR, "icons/delete_icon.png")
+        self.take_note_icon_path = os.path.join(BASE_DIR, "icons/take_note_icon.png")
 
         self.attributes = ["Name", "Author", "Publication Year", "Publisher", "Genre", "ISBN", "Page Count", "Pages Read", "Status"]
 
@@ -61,6 +71,17 @@ class Library(ctk.CTk):
                 status TEXT DEFAULT 'Ready to Start'
             )
         """)
+
+        self.cursor.execute("""
+            CREATE TABLE IF NOT EXISTS reading_logs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                book_name INTEGER,
+                pages_read INTEGER,
+                date DATE,
+                FOREIGN KEY (book_name) REFERENCES books (book_name)
+            )
+        """)
+
         self.conn.commit()
 
     def widgets(self):
@@ -94,26 +115,38 @@ class Library(ctk.CTk):
         )
         self.widget_texts["homepage_header"].grid(row=0, column=0, padx=20, pady=20, sticky="nw")
 
+        library_icon = PhotoImage(file=self.library_icon_path)
+        library_icon = library_icon.subsample(12, 12)
+
         self.widget_texts["library_page_button"] = ctk.CTkButton(
             main_frame,
-            # image=library_icon,
-            text=self.get_text("library_page_button"),
+            image=library_icon,
+            text="",
+            # text=self.get_text("library_page_button"),
             command=self.library_page,
         )
         self.widget_texts["library_page_button"].grid(row=0, column=2, padx=20, pady=20, sticky="ne")
 
+        stats_icon = PhotoImage(file=self.stats_icon_path)
+        stats_icon = stats_icon.subsample(12, 12)
+
         self.widget_texts["stats_button"] = ctk.CTkButton(
             main_frame,
-            # image=stats_icon,
-            text=self.get_text("stats_button"),
+            image=stats_icon,
+            text="",
+            # text=self.get_text("stats_button"),
             command=self.stats_page,
         )
         self.widget_texts["stats_button"].grid(row=0, column=3, padx=20, pady=20, sticky="ne")
 
+        settings_icon = PhotoImage(file=self.settings_icon_path)
+        settings_icon = settings_icon.subsample(12, 12)
+
         self.widget_texts["settings_button"] = ctk.CTkButton(
             main_frame,
-            # image=settings_icon,
-            text=self.get_text("settings_button"),
+            image=settings_icon,
+            text="",
+            # text=self.get_text("settings_button"),
             command=self.settings_page,
         )
         self.widget_texts["settings_button"].grid(row=0, column=4, padx=20, pady=20, sticky="ne")
@@ -166,15 +199,32 @@ class Library(ctk.CTk):
         )
         self.widget_texts["library_header"].grid(row=0, column=0, padx=20, pady=20, sticky="nw")
 
+        take_note_icon = PhotoImage(file=self.take_note_icon_path)
+        take_note_icon = take_note_icon.subsample(12, 12)
+
+        self.widget_texts["take_note_button"] = ctk.CTkButton(
+            main_frame,
+            image=take_note_icon,
+            text="",
+            # text=self.get_text("take_note_button"),
+            # command=self.note_page
+        )
+        self.widget_texts["take_note_button"].grid(row=0, column=1, padx=20, pady=20, sticky="ne")
+
+        homepage_icon = PhotoImage(file=self.homepage_icon_path)
+        homepage_icon = homepage_icon.subsample(12, 12)
+
         self.widget_texts["homepage_button"] = ctk.CTkButton(
             main_frame,
-            text=self.get_text("homepage_button"),
+            image=homepage_icon,
+            text="",
+            # text=self.get_text("homepage_button"),
             command=self.homepage
         )
-        self.widget_texts["homepage_button"].grid(row=0, column=1, padx=20, pady=20, sticky="ne")
+        self.widget_texts["homepage_button"].grid(row=0, column=2, padx=20, pady=20, sticky="ne")
 
         center_frame = ctk.CTkFrame(main_frame)
-        center_frame.grid(row=1, column=0, columnspan=2, sticky="nsew", padx=20, pady=20)
+        center_frame.grid(row=1, column=0, columnspan=3, sticky="nsew", padx=20, pady=20)
 
         book_no_title = ctk.CTkLabel(
             center_frame, 
@@ -269,9 +319,14 @@ class Library(ctk.CTk):
         )
         self.widget_texts["stats_header"].grid(row=0, column=0, padx=20, pady=20, sticky="nw")
 
+        homepage_icon = PhotoImage(file=self.homepage_icon_path)
+        homepage_icon = homepage_icon.subsample(12, 12)
+
         self.widget_texts["homepage_button"] = ctk.CTkButton(
             main_frame,
-            text=self.get_text("homepage_button"),
+            image=homepage_icon,
+            text="",
+            # text=self.get_text("homepage_button"),
             command=self.homepage
         )
         self.widget_texts["homepage_button"].grid(row=0, column=1, padx=20, pady=20, sticky="ne")
@@ -312,9 +367,14 @@ class Library(ctk.CTk):
         )
         self.widget_texts["settings_header"].grid(row=0, column=0, padx=20, pady=20, sticky="nw")
 
+        homepage_icon = PhotoImage(file=self.homepage_icon_path)
+        homepage_icon = homepage_icon.subsample(12, 12)
+
         self.widget_texts["homepage_button"] = ctk.CTkButton(
             main_frame,
-            text=self.get_text("homepage_button"),
+            image=homepage_icon,
+            text="",
+            # text=self.get_text("homepage_button"),
             command=self.homepage
         )
         self.widget_texts["homepage_button"].grid(row=0, column=9, padx=20, pady=20, sticky="ne")
@@ -327,9 +387,9 @@ class Library(ctk.CTk):
         self.widget_texts["set_theme_color_label"].grid(row=1, column=0, padx=20, pady=(20, 0), sticky="w")
 
         themes = [
-            {"text": "Dark", "theme": "dark"},
-            {"text": "Light", "theme": "light"},
-            {"text": "System", "theme": "system"}
+            {"text": self.get_text("dark"), "theme": "dark"},
+            {"text": self.get_text("light"), "theme": "light"},
+            {"text": self.get_text("system"), "theme": "system"}
         ]
 
         self.widget_texts["theme_label"] = ctk.CTkLabel(
@@ -350,14 +410,14 @@ class Library(ctk.CTk):
             theme_button.grid(row=2, column=index+1, padx=0, pady=0)
 
         colors = [
-            {"text": "Blue", "color": "blue"},
-            {"text": "Dark Blue", "color": "dark-blue"},
-            {"text": "Green", "color": "green"},
+            {"text": self.get_text("blue"), "color": "blue"},
+            {"text": self.get_text("dark-blue"), "color": "dark-blue"},
+            {"text": self.get_text("green"), "color": "green"},
         ]
 
         self.widget_texts["color_label"] = ctk.CTkLabel(
             main_frame,
-            text="Color",
+            text=self.get_text("color_label"),
             font=("Arial", 20)
         )
         self.widget_texts["color_label"].grid(row=3, column=0, padx=20, pady=0, sticky="w")
@@ -416,7 +476,7 @@ class Library(ctk.CTk):
             text=self.get_text("change_language_button"), 
             command=self.change_language
         )
-        self.widget_texts["change_language_button"].grid(row=7, column=0, padx=20, pady=20)
+        self.widget_texts["change_language_button"].grid(row=7, column=0, padx=20, pady=20, sticky="w")
 
     def add_pages_page(self):
         for widget in self.winfo_children():
@@ -435,17 +495,7 @@ class Library(ctk.CTk):
         # )
         # header.grid(row=0, column=0, columnspan=2, pady=20)
 
-        self.widget_texts["pages_label"] = ctk.CTkLabel(
-            center_frame, 
-            text=self.get_text("pages_label"),
-        )
-        self.widget_texts["pages_label"].grid(row=0, column=0, padx=10, pady=10, sticky="e")
-
-        pages_entry = ctk.CTkEntry(
-            center_frame, 
-            placeholder_text="..."
-        )
-        pages_entry.grid(row=0, column=1, padx=10, pady=10, sticky="w")
+        validate_cmd = (center_frame.register(self.validate_input), "%P")
 
         book_list = self.get_books_from_db()
 
@@ -453,18 +503,32 @@ class Library(ctk.CTk):
             center_frame, 
             text=self.get_text("book_label")
         )
-        self.widget_texts["book_label"].grid(row=1, column=0, padx=10, pady=10, sticky="e")
+        self.widget_texts["book_label"].grid(row=0, column=0, padx=10, pady=10, sticky="e")
 
         book_combobox = ctk.CTkComboBox(
             center_frame, 
             values=book_list
         )
-        book_combobox.grid(row=1, column=1, padx=10, pady=10, sticky="w")
+        book_combobox.grid(row=0, column=1, padx=10, pady=10, sticky="w")
+
+        self.widget_texts["pages_label"] = ctk.CTkLabel(
+            center_frame, 
+            text=self.get_text("pages_label"),
+        )
+        self.widget_texts["pages_label"].grid(row=1, column=0, padx=10, pady=10, sticky="e")
+
+        pages_entry = ctk.CTkEntry(
+            center_frame, 
+            placeholder_text="...",
+            validate="key",
+            validatecommand=validate_cmd
+        )
+        pages_entry.grid(row=1, column=1, padx=10, pady=10, sticky="w")
 
         self.widget_texts["save_record_button"] = ctk.CTkButton(
             center_frame,
             text=self.get_text("save_record_button"),
-            # command=self.save_book,
+            command=lambda: self.save_reading_log(book_combobox.get(), pages_entry.get()),
             fg_color="darkgreen"
         )
         self.widget_texts["save_record_button"].grid(row=2, column=0, columnspan=2, padx=10, pady=10)
@@ -477,6 +541,25 @@ class Library(ctk.CTk):
         )
         self.widget_texts["back_button"].grid(row=3, column=0, columnspan=2, padx=10, pady=10)
 
+    def save_reading_log(self, book_name, pages_read):
+        pages_read = int(pages_read)
+
+        if pages_read > 0:
+            self.cursor.execute(
+                "UPDATE books SET pages_read = pages_read + ? WHERE book_name = ?",
+                (pages_read, book_name)
+            )
+            self.conn.commit()
+
+            messagebox.showinfo(self.get_text("success_title"), f"{pages_read}" + self.get_text("pages_added"))
+
+            self.homepage()
+        else:
+            messagebox.showerror(
+                self.get_text("error_title"),
+                self.get_text("error_page_count")
+            )
+            
     def add_book_page(self):
         for widget in self.winfo_children():
             widget.grid_forget()
@@ -646,6 +729,14 @@ class Library(ctk.CTk):
         
         for widget_key, widget in self.widget_texts.items():
             widget.configure(text=self.get_text(widget_key))
+
+        settings = self.load_settings()
+        settings["language"] = self.language
+
+        with open("data/settings.json", "w") as file:
+            json.dump(settings, file, indent=4)
+
+        self.settings_page()
 
 if __name__ == "__main__":
     app = Library()
