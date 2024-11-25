@@ -38,6 +38,7 @@ class Library(ctk.CTk):
         self.add_icon_path = os.path.join(BASE_DIR, "icons/add_icon.png")
         self.delete_icon_path = os.path.join(BASE_DIR, "icons/delete_icon.png")
         self.take_note_icon_path = os.path.join(BASE_DIR, "icons/take_note_icon.png")
+        self.go_back_icon_path = os.path.join(BASE_DIR, "icons/go_back_icon.png")
 
         self.attributes = ["Name", "Author", "Publication Year", "Publisher", "Genre", "ISBN", "Page Count", "Pages Read", "Status"]
 
@@ -316,7 +317,7 @@ class Library(ctk.CTk):
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
-        main_frame = ctk.CTkFrame(self)
+        main_frame = ctk.CTkScrollableFrame(self)
         main_frame.grid(row=0, column=0, sticky="nsew", padx=20, pady=20)
 
         # main_frame.grid_rowconfigure(0, weight=0)
@@ -333,87 +334,20 @@ class Library(ctk.CTk):
         )
         self.widget_texts["notes_header"].grid(row=0, column=0, padx=20, pady=20, sticky="nw")
 
-        homepage_icon = PhotoImage(file=self.homepage_icon_path)
-        homepage_icon = homepage_icon.subsample(12, 12)
+        go_back_icon = PhotoImage(file=self.go_back_icon_path)
+        go_back_icon = go_back_icon.subsample(12, 12)
 
         self.widget_texts["library_page_button"] = ctk.CTkButton(
             main_frame,
-            image=homepage_icon,
+            image=go_back_icon,
             text="",
             # text=self.get_text("library_page_button"),
             command=self.library_page
         )
         self.widget_texts["library_page_button"].grid(row=0, column=2, padx=20, pady=20, sticky="ne")
 
-        self.cursor.execute("SELECT * FROM notes")
-        notes = self.cursor.fetchall()
-
-        for i, note in enumerate(notes):
-            title_label = ctk.CTkLabel(
-                main_frame,
-                text="Title:",
-                # width=100
-            )
-            title_label.grid(row=i * 5 + 2, column=0, padx=10, pady=5, sticky="w")
-
-            title_entry = ctk.CTkEntry(
-                main_frame,
-                corner_radius=5,
-                width=400
-            )
-            title_entry.insert(0, note[1])
-            title_entry.grid(row=i * 5 + 2, column=1, padx=10, pady=5, sticky="w")
-
-            # Content
-            content_label = ctk.CTkLabel(
-                main_frame,
-                text="Content:",
-                # width=100
-            )
-            content_label.grid(row=i * 5 + 3, column=0, padx=10, pady=5, sticky="w")
-
-            content_entry = ctk.CTkEntry(
-                main_frame,
-                corner_radius=5,
-                width=400,
-                height=100
-            )
-            content_entry.insert(0, note[2])
-            content_entry.grid(row=i * 5 + 3, column=1, padx=10, pady=5, sticky="w")
-
-            tag_label = ctk.CTkLabel(
-                main_frame,
-                text="Tag:",
-                # width=100
-            )
-            tag_label.grid(row=i * 5 + 4, column=0, padx=10, pady=5, sticky="w")
-
-            tag_entry = ctk.CTkEntry(
-                main_frame,
-                corner_radius=5,
-                width=400
-            )
-            tag_entry.insert(0, note[3])
-            tag_entry.grid(row=i * 5 + 4, column=1, padx=10, pady=5, sticky="w")
-
-            date_label = ctk.CTkLabel(
-                main_frame,
-                text=note[4],
-                # width=100
-            )
-            date_label.grid(row=i * 5 + 5, column=0, padx=10, pady=5, sticky="w")
-
-            save_button = ctk.CTkButton(
-                main_frame,
-                text="Save",
-                command=lambda t=title_entry, c=content_entry, tg=tag_entry, n_id=note[0]: self.update_note(t, c, tg, n_id),
-                fg_color="green",
-                width=100
-            )
-            save_button.grid(row=i * 5 + 6, column=1, padx=10, pady=10, sticky="")
-
         add_icon = PhotoImage(file=self.add_icon_path)
-        add_icon = add_icon.subsample(10, 10)
+        add_icon = add_icon.subsample(12, 12)
 
         self.add_note_button = ctk.CTkButton(
             main_frame,
@@ -425,11 +359,87 @@ class Library(ctk.CTk):
             fg_color="transparent",
             hover=None
         )
-        self.add_note_button.grid(row=1, column=0, sticky="sw", padx=20, pady=10)
+        self.add_note_button.grid(row=1, column=0, sticky="w", padx=20, pady=20)
 
-    def update_note(self, title_entry, content_entry, tag_entry, id):
+        self.cursor.execute("SELECT * FROM notes")
+        notes = self.cursor.fetchall()
+
+        for i, note in enumerate(notes):
+            date_label = ctk.CTkLabel(
+                main_frame,
+                text=note[4],
+                font=("Helvetica", 14, "bold"),
+                # width=100
+            )
+            date_label.grid(row=i * 5 + 2, column=0, padx=(20, 0), pady=(20, 5), sticky="w")
+
+            title_label = ctk.CTkLabel(
+                main_frame,
+                text=self.get_text("note_title") + ":",
+                # width=100
+            )
+            title_label.grid(row=i * 5 + 3, column=0, padx=(20, 0), pady=5, sticky="w")
+
+            title_entry = ctk.CTkEntry(
+                main_frame,
+                corner_radius=5,
+                width=400
+            )
+            title_entry.insert(0, note[1])
+            title_entry.grid(row=i * 5 + 3, column=1, padx=10, pady=5, sticky="w")
+
+            content_label = ctk.CTkLabel(
+                main_frame,
+                text=self.get_text("note_content") + ":",
+                # width=100
+            )
+            content_label.grid(row=i * 5 + 4, column=0, padx=(20, 0), pady=5, sticky="w")
+
+            self.content_update_textbox = ctk.CTkTextbox(
+                main_frame,
+                corner_radius=5,
+                width=400,
+                height=100
+            )
+            self.content_update_textbox.insert("0.0", note[2])
+            self.content_update_textbox.grid(row=i * 5 + 4, column=1, padx=10, pady=5, sticky="w")
+
+            tag_label = ctk.CTkLabel(
+                main_frame,
+                text=self.get_text("note_tag") + ":",
+                # width=100
+            )
+            tag_label.grid(row=i * 5 + 5, column=0, padx=(20, 0), pady=5, sticky="w")
+
+            tag_entry = ctk.CTkEntry(
+                main_frame,
+                corner_radius=5,
+                width=400
+            )
+            tag_entry.insert(0, note[3])
+            tag_entry.grid(row=i * 5 + 5, column=1, padx=10, pady=5, sticky="w")
+
+            save_button = ctk.CTkButton(
+                main_frame,
+                text=self.get_text("save_button"),
+                command=lambda t=title_entry, tg=tag_entry, n_id=note[0]: self.update_note(t, tg, n_id),
+                fg_color="green",
+                width=100
+            )
+            save_button.grid(row=i * 5 + 6, column=0, padx=10, pady=10, sticky="w")
+
+            delete_note_button = ctk.CTkButton(
+                main_frame,
+                text=self.get_text("delete_note_title"),
+                command=lambda n_id=note[0]: self.delete_note(n_id),
+                fg_color="darkred",
+                width=100
+            )
+            delete_note_button.grid(row=i * 5 + 6, column=0, padx=0, pady=10, sticky="e")
+
+    def update_note(self, title_entry, tag_entry, id):
         title = title_entry.get()
-        content = content_entry.get()
+        content = self.content_update_textbox.get("0.0", "end-1c")
         tag = tag_entry.get()
 
         self.cursor.execute("""
@@ -466,34 +476,60 @@ class Library(ctk.CTk):
         # )
         # header.grid(row=0, column=0, columnspan=2, pady=20)
 
+        self.widget_texts["note_title"] = ctk.CTkLabel(
+            center_frame,
+            text=self.get_text("note_title"),
+            font=("Helvetica", 14, "bold")
+        )
+        self.widget_texts["note_title"].grid(row=0, column=0, padx=20, pady=(10, 5), sticky="w")
+
         self.note_title_entry = ctk.CTkEntry(
             center_frame,
-            placeholder_text=self.get_text("note_title_entry_placeholder_text"),
-            width=300,
+            width=200,
         )
         self.note_title_entry.grid(row=1, column=0, columnspan=2, padx=20, pady=(10, 5), sticky="w")
 
-        self.note_content_entry = ctk.CTkEntry(
+        # self.note_content_entry = ctk.CTkEntry(
+        #     center_frame,
+        #     placeholder_text=self.get_text("note_content"),
+        #     width=300,
+        #     height=50
+        # )
+        self.widget_texts["note_content"] = ctk.CTkLabel(
             center_frame,
-            placeholder_text=self.get_text("note_content_entry_placeholder_text"),
-            width=300,
-            height=50
+            text=self.get_text("note_content"),
+            font=("Helvetica", 14, "bold")
         )
-        self.note_content_entry.grid(row=2, column=0, columnspan=2, padx=20, pady=5, sticky="w")
+        self.widget_texts["note_content"].grid(row=2, column=0, padx=20, pady=(10, 5), sticky="w")
+
+        self.note_content_entry = ctk.CTkTextbox(
+            center_frame,
+            corner_radius=5,
+            width=400,
+            height=100
+        )
+        self.note_content_entry.grid(row=3, column=0, columnspan=2, padx=20, pady=5, sticky="w")
+
+        self.widget_texts["note_tag"] = ctk.CTkLabel(
+            center_frame,
+            text=self.get_text("note_tag"),
+            font=("Helvetica", 14, "bold")
+        )
+        self.widget_texts["note_tag"].grid(row=4, column=0, padx=20, pady=(10, 5), sticky="w")
 
         self.note_tag_entry = ctk.CTkEntry(
             center_frame,
-            placeholder_text=self.get_text("note_tag_entry_placeholder_text"),
+            width=200,
         )
-        self.note_tag_entry.grid(row=3, column=0, columnspan=2, padx=20, pady=5, sticky="w")
+        self.note_tag_entry.grid(row=5, column=0, columnspan=2, padx=20, pady=5, sticky="w")
 
         self.widget_texts["note_save_button"] = ctk.CTkButton(
             center_frame,
             text=self.get_text("note_save_button"),
-            command=lambda: self.save_note(self.note_title_entry.get(), self.note_content_entry.get(), self.note_tag_entry.get()),
+            command=lambda: self.save_note(self.note_title_entry.get(), self.note_tag_entry.get()),
             fg_color="darkgreen"
         )
-        self.widget_texts["note_save_button"].grid(row=4, column=0, padx=10, pady=10)
+        self.widget_texts["note_save_button"].grid(row=6, column=0, padx=20, pady=10, sticky="w")
 
         self.widget_texts["back_button"] = ctk.CTkButton(
             center_frame,
@@ -501,9 +537,11 @@ class Library(ctk.CTk):
             command=self.notes_page,
             fg_color="darkred"
         )
-        self.widget_texts["back_button"].grid(row=4, column=1, columnspan=2, padx=10, pady=10)
+        self.widget_texts["back_button"].grid(row=6, column=1, padx=20, pady=10, sticky="e")
 
-    def save_note(self, title, content, tag):
+    def save_note(self, title, tag):
+        content = self.note_content_entry.get("0.0", "end-1c")
+
         self.cursor.execute("""
             INSERT INTO notes (title, content, tag, date)
             VALUES (:title, :content, :tag, :date)
@@ -521,6 +559,20 @@ class Library(ctk.CTk):
         )
 
         self.notes_page()
+
+    def delete_note(self, note_id):
+        title_confirm = self.get_text("delete_note_title")
+        message_confirm = self.get_text("delete_note_message")
+        title_success = self.get_text("delete_success_title")
+        message_success = self.get_text("delete_note_success_message")
+
+        confirm = messagebox.askyesno(title_confirm, message_confirm)
+
+        if confirm:
+            self.cursor.execute("DELETE FROM notes WHERE id = ?", (note_id,))
+            self.conn.commit()
+            messagebox.showinfo(title_success, message_success)
+            self.notes_page()
 
     def stats_page(self):
         for widget in self.winfo_children():
