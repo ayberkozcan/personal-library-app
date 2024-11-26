@@ -827,6 +827,19 @@ class Library(ctk.CTk):
             )
             self.conn.commit()
 
+            try:
+                with open("data/settings.json", "r") as settings_file:
+                    settings = json.load(settings_file)
+                settings["last_read_book"] = book_name
+
+                with open("data/settings.json", "w") as settings_file:
+                    json.dump(settings, settings_file, indent=4)
+
+            except FileNotFoundError:
+                messagebox.showerror(self.get_text("error_title"), self.get_text("settings_file_not_found"))
+            except json.JSONDecodeError:
+                messagebox.showerror(self.get_text("error_title"), self.get_text("error_parsing_json"))
+
             messagebox.showinfo(self.get_text("success_title"), f"{pages_read}" + self.get_text("pages_added"))
 
             self.homepage()
