@@ -618,12 +618,14 @@ class Library(ctk.CTk):
         main_frame.grid(row=0, column=0, sticky="nsew", padx=20, pady=20)
 
         main_frame.grid_rowconfigure(0, weight=0)
-        main_frame.grid_rowconfigure(1, weight=1)
+        main_frame.grid_rowconfigure(1, weight=2)
         main_frame.grid_rowconfigure(2, weight=1)
         main_frame.grid_rowconfigure(3, weight=1)
-        main_frame.grid_rowconfigure(4, weight=1)
+        main_frame.grid_rowconfigure(4, weight=2)
         main_frame.grid_rowconfigure(5, weight=1)
         main_frame.grid_rowconfigure(6, weight=1)
+        main_frame.grid_rowconfigure(7, weight=1)
+        main_frame.grid_rowconfigure(8, weight=1)
         
         main_frame.grid_columnconfigure(0, weight=1)
         main_frame.grid_columnconfigure(1, weight=2)
@@ -717,6 +719,13 @@ class Library(ctk.CTk):
 
         validate_cmd = (main_frame.register(self.validate_input), "%P")
 
+        with open("data/settings.json", "r") as file:
+            settings = json.load(file)
+            
+        daily_goal_placeholder = settings.get("daily_goal", "default")
+        weekly_goal_placeholder = settings.get("weekly_goal", "default")
+        monthly_goal_placeholder = settings.get("monthly_goal", "default")
+
         self.widget_texts["daily_goal_label"] = ctk.CTkLabel(
             main_frame,
             text=self.get_text("daily_goal_label"),
@@ -726,7 +735,7 @@ class Library(ctk.CTk):
 
         daily_goal_entry = ctk.CTkEntry(
             main_frame,
-            placeholder_text="...",
+            placeholder_text=daily_goal_placeholder,
             validate="key",
             validatecommand=validate_cmd
         )
@@ -741,18 +750,40 @@ class Library(ctk.CTk):
         
         weekly_goal_entry = ctk.CTkEntry(
             main_frame,
-            placeholder_text="...",
+            placeholder_text=weekly_goal_placeholder,
             validate="key",
             validatecommand=validate_cmd
         )
         weekly_goal_entry.grid(row=6, column=1, columnspan=2, padx=20, pady=0, sticky="w")
+
+        self.widget_texts["monthly_goal_label"] = ctk.CTkLabel(
+            main_frame,
+            text=self.get_text("monthly_goal_label"),
+            font=("Arial", 20)
+        )
+        self.widget_texts["monthly_goal_label"].grid(row=7, column=0, padx=20, pady=0, sticky="w")
+        
+        monthly_goal_entry = ctk.CTkEntry(
+            main_frame,
+            placeholder_text=monthly_goal_placeholder,
+            validate="key",
+            validatecommand=validate_cmd
+        )
+        monthly_goal_entry.grid(row=7, column=1, columnspan=2, padx=20, pady=0, sticky="w")
+
+        self.widget_texts["save_goals_button"] = ctk.CTkButton(
+            main_frame, 
+            text=self.get_text("save_button"), 
+            command=lambda: self.save_goals(daily_goal_entry.get(), weekly_goal_entry.get(), monthly_goal_entry.get())
+        )
+        self.widget_texts["save_goals_button"].grid(row=8, column=0, padx=20, pady=20, sticky="w")
 
         self.widget_texts["change_language_button"] = ctk.CTkButton(
             main_frame, 
             text=self.get_text("change_language_button"), 
             command=self.change_language
         )
-        self.widget_texts["change_language_button"].grid(row=7, column=0, padx=20, pady=20, sticky="w")
+        self.widget_texts["change_language_button"].grid(row=9, column=0, padx=20, pady=20, sticky="w")
 
     def add_pages_page(self):
         for widget in self.winfo_children():
@@ -1007,6 +1038,21 @@ class Library(ctk.CTk):
 
     def get_text(self, key):
         return self.languages.get(self.language, {}).get(key, key)
+
+    def save_goals(self, daily, weekly, monthly):
+        daily_goal = daily
+        weekly_goal = weekly
+        monthly_goal = monthly
+
+        settings = self.load_settings()
+        settings["daily_goal"] = daily_goal
+        settings["weekly_goal"] = weekly_goal
+        settings["monthly_goal"] = monthly_goal
+
+        with open("data/settings.json", "w") as file:
+            json.dump(settings, file, indent=4)
+
+        self.settings_page()
 
     def change_language(self):
         if self.language == 'en':
