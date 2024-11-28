@@ -22,6 +22,7 @@
         "Page Count": "Page Count",
         "Pages Read": "Pages Read",
         "Status": "Status",
+        "edit_book_header": "Edit Book",
 
         "notes_header": "My Notes",
         "note_title": "Title",
@@ -92,6 +93,7 @@
         "Page Count": "Sayfa Sayısı",
         "Pages Read": "Okunan Sayfa",
         "Status": "Durum",
+        "edit_book_header": "Kitabı Düzenle",
 
         "notes_header": "Notlarım",
         "note_title": "Başlık",
@@ -162,8 +164,9 @@
         "Page Count": "Seitenanzahl",
         "Pages Read": "Gelesene Seiten",
         "Status": "Status",
+        "edit_book_header": "Buch Bearbeiten",
     
-        "notes_header": "Meine Notizen",
+        "notes_header": "Notizen",
         "note_title": "Titel",
         "note_content": "Inhalt",
         "note_tag": "Tag",

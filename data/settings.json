@@ -1,9 +1,9 @@
 {
-    "theme": "system",
-    "color": "green",
+    "theme": "dark",
+    "color": "blue",
     "language": "en",
-    "daily_goal": "20",
+    "daily_goal": "10",
     "weekly_goal": "140",
-    "monthly_goal": "500",
-    "last_read_book": "isim"
+    "monthly_goal": "560",
+    "last_read_book": "bb"
 }

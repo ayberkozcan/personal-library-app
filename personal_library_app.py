@@ -36,6 +36,7 @@ class Library(ctk.CTk):
 
         # Library
         self.add_icon_path = os.path.join(BASE_DIR, "icons/add_icon.png")
+        self.edit_icon_path = os.path.join(BASE_DIR, "icons/edit_icon.png")
         self.delete_icon_path = os.path.join(BASE_DIR, "icons/delete_icon.png")
         self.take_note_icon_path = os.path.join(BASE_DIR, "icons/take_note_icon.png")
         self.go_back_icon_path = os.path.join(BASE_DIR, "icons/go_back_icon.png")
@@ -48,6 +49,7 @@ class Library(ctk.CTk):
         self.attributes = ["Name", "Author", "Publication Year", "Publisher", "Genre", "ISBN", "Page Count", "Pages Read", "Status"]
 
         self.entries = {}
+        self.entries_edit = {}
 
         self.connect_database()
 
@@ -269,7 +271,7 @@ class Library(ctk.CTk):
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
-        main_frame = ctk.CTkFrame(self)
+        main_frame = ctk.CTkScrollableFrame(self)
         main_frame.grid(row=0, column=0, sticky="nsew", padx=20, pady=20)
 
         main_frame.grid_rowconfigure(0, weight=0)
@@ -351,6 +353,22 @@ class Library(ctk.CTk):
                     attribute_label = ctk.CTkLabel(center_frame, text=attribute, font=("Arial", 12))
                     attribute_label.grid(row=i, column=j, padx=10, pady=5)
 
+                edit_icon = PhotoImage(file=self.edit_icon_path)
+                edit_icon = edit_icon.subsample(20, 20)
+
+                edit_button = ctk.CTkButton(
+                    center_frame,
+                    image=edit_icon,
+                    text="",
+                    command=lambda book_id=book[0]: self.edit_book_page(book_id),
+                    fg_color="green",
+                    hover_color="darkgreen",
+                    width=10,
+                    height=10,
+                    corner_radius=10
+                )
+                edit_button.grid(row=i, column=j+1, padx=10, pady=5)
+
                 delete_icon = PhotoImage(file=self.delete_icon_path)
                 delete_icon = delete_icon.subsample(20, 20)
 
@@ -361,11 +379,11 @@ class Library(ctk.CTk):
                     command=lambda book_id=book[0]: self.delete_book(book_id),
                     fg_color="red",
                     hover_color="darkred",
-                    width=20,
-                    height=20,
+                    width=10,
+                    height=10,
                     corner_radius=10
                 )
-                delete_button.grid(row=i, column=j+1, padx=10, pady=5)
+                delete_button.grid(row=i, column=j+2, padx=10, pady=5)
 
         add_icon = PhotoImage(file=self.add_icon_path)
         add_icon = add_icon.subsample(10, 10)
@@ -381,6 +399,105 @@ class Library(ctk.CTk):
             hover=None
         )
         self.add_book_button.grid(row=2, column=0, sticky="sw", padx=20, pady=10)
+
+    def edit_book_page(self, book_id):
+        for widget in self.winfo_children():
+            widget.grid_forget()
+
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+
+        book = self.cursor.execute("""
+            SELECT * 
+            FROM books
+            WHERE id = :book_id
+        """, {
+            "book_id": book_id
+        }).fetchone()
+        print(book)
+        
+        center_frame = ctk.CTkFrame(self)
+        center_frame.grid(row=0, column=0, padx=20, pady=20)
+
+        self.widget_texts["edit_book_header"] = ctk.CTkLabel(
+            center_frame,
+            text=self.get_text("edit_book_header"),
+            font=("Arial", 24, "bold")
+        )
+        self.widget_texts["edit_book_header"].grid(row=0, column=0, columnspan=2, pady=20)
+
+        for i, attr in enumerate(self.attributes[:8]):
+            placeholder = book[i+1]
+            self.create_label_and_entry_in_frame_edit_page(center_frame, attr, placeholder, row=i+1)
+
+        self.widget_texts["save_book_button"] = ctk.CTkButton(
+            center_frame,
+            text=self.get_text("save_book_button"),
+            command=lambda: self.edit_book(book_id),
+            fg_color="darkgreen"
+        )
+        self.widget_texts["save_book_button"].grid(row=len(self.attributes)+1, column=0, columnspan=2, padx=10, pady=10)
+
+        self.widget_texts["back_button"] = ctk.CTkButton(
+            center_frame,
+            text=self.get_text("back_button"),
+            command=self.library_page,
+            fg_color="darkred"
+        )
+        self.widget_texts["back_button"].grid(row=len(self.attributes)+2, column=0, columnspan=2, padx=10, pady=10)
+
+    def edit_book(self, book_id):
+        book_data = {key: entry.get() for key, entry in self.entries_edit.items()}
+
+        publication_year = book_data["Publication Year"]
+        if not publication_year.isdigit():
+            messagebox.showerror(
+                self.get_text("error_title"),
+                self.get_text("error_publication_year")
+            )
+            return
+
+        isbn = book_data["ISBN"]
+        if not isbn.isdigit():
+            messagebox.showerror(
+                self.get_text("error_title"),
+                self.get_text("error_isbn")
+            )
+            return
+
+        page_count = book_data["Page Count"]
+        if not page_count.isdigit():
+            messagebox.showerror(
+                self.get_text("error_title"),
+                self.get_text("error_page_count")
+            )
+            return
+        
+        self.cursor.execute("""
+            UPDATE books
+            SET book_name = :book_name, author_name = :author_name, 
+            publication_year = :publication_year, publisher = :publisher, 
+            genre = :genre, isbn = :isbn, page_count = :page_count, pages_read = :pages_read
+            WHERE id = :id
+        """, {
+            "book_name": book_data["Name"],
+            "author_name": book_data["Author"],
+            "publication_year": book_data["Publication Year"],
+            "publisher": book_data["Publisher"],
+            "genre": book_data["Genre"],
+            "isbn": book_data["ISBN"],
+            "page_count": book_data["Page Count"],
+            "pages_read": book_data["Pages Read"],
+            "id": book_id
+        })
+        self.conn.commit()
+
+        messagebox.showinfo(
+            self.get_text("success_title"),
+            self.get_text("success_message")
+        )
+
+        self.library_page()
 
     def notes_page(self):
         for widget in self.winfo_children():
@@ -811,6 +928,7 @@ class Library(ctk.CTk):
             validate="key",
             validatecommand=validate_cmd
         )
+        daily_goal_entry.insert(0, daily_goal_placeholder)
         daily_goal_entry.grid(row=5, column=1, columnspan=2, padx=20, pady=0, sticky="w")
 
         self.widget_texts["weekly_goal_label"] = ctk.CTkLabel(
@@ -826,6 +944,7 @@ class Library(ctk.CTk):
             validate="key",
             validatecommand=validate_cmd
         )
+        weekly_goal_entry.insert(0, weekly_goal_placeholder)
         weekly_goal_entry.grid(row=6, column=1, columnspan=2, padx=20, pady=0, sticky="w")
 
         self.widget_texts["monthly_goal_label"] = ctk.CTkLabel(
@@ -841,6 +960,7 @@ class Library(ctk.CTk):
             validate="key",
             validatecommand=validate_cmd
         )
+        monthly_goal_entry.insert(0, monthly_goal_placeholder)
         monthly_goal_entry.grid(row=7, column=1, columnspan=2, padx=20, pady=0, sticky="w")
 
         self.widget_texts["save_goals_button"] = ctk.CTkButton(
@@ -1037,6 +1157,16 @@ class Library(ctk.CTk):
         entry.grid(row=row, column=1, padx=10, pady=10, sticky="w")
 
         self.entries[text] = entry
+
+    def create_label_and_entry_in_frame_edit_page(self, frame, text, placeholder, row):
+        label = ctk.CTkLabel(frame, text=self.get_text(text))
+        label.grid(row=row, column=0, padx=10, pady=10, sticky="e")
+
+        entry = ctk.CTkEntry(frame, placeholder_text=placeholder)
+        entry.insert(0, placeholder)
+        entry.grid(row=row, column=1, padx=10, pady=10, sticky="w")
+
+        self.entries_edit[text] = entry
 
     def save_book(self):
         book_data = {key: entry.get() for key, entry in self.entries.items()}
