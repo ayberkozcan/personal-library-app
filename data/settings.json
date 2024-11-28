@@ -1,6 +1,9 @@
 {
     "theme": "system",
     "color": "green",
-    "language": "tr",
-    "last_read_book": "a"
+    "language": "en",
+    "daily_goal": "20",
+    "weekly_goal": "140",
+    "monthly_goal": "500",
+    "last_read_book": "isim"
 }

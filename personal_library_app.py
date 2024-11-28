@@ -4,7 +4,7 @@ from tkinter import messagebox
 import sqlite3
 import customtkinter as ctk
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 
 class Library(ctk.CTk):
     def __init__(self):
@@ -39,6 +39,11 @@ class Library(ctk.CTk):
         self.delete_icon_path = os.path.join(BASE_DIR, "icons/delete_icon.png")
         self.take_note_icon_path = os.path.join(BASE_DIR, "icons/take_note_icon.png")
         self.go_back_icon_path = os.path.join(BASE_DIR, "icons/go_back_icon.png")
+
+        # Settings
+        self.english_icon_path = os.path.join(BASE_DIR, "icons/languages/english_icon.png")
+        self.turkish_icon_path = os.path.join(BASE_DIR, "icons/languages/turkish_icon.png")
+        self.german_icon_path = os.path.join(BASE_DIR, "icons/languages/german_icon.png")
 
         self.attributes = ["Name", "Author", "Publication Year", "Publisher", "Genre", "ISBN", "Page Count", "Pages Read", "Status"]
 
@@ -113,6 +118,7 @@ class Library(ctk.CTk):
         main_frame.grid_rowconfigure(1, weight=1)
         main_frame.grid_rowconfigure(2, weight=1)
         main_frame.grid_rowconfigure(3, weight=3)
+        main_frame.grid_rowconfigure(4, weight=1)
 
         main_frame.grid_columnconfigure(0, weight=1)
         main_frame.grid_columnconfigure(1, weight=2)
@@ -183,12 +189,78 @@ class Library(ctk.CTk):
         )
         self.add_pages_button.grid(row=2, column=1, columnspan=3, padx=20, pady=5, sticky="nsew")
 
+        with open("data/settings.json", "r") as settings_file:
+            settings = json.load(settings_file)
+
+        daily_goal = settings.get("daily_goal", "goal")
+        weekly_goal = settings.get("weekly_goal", "goal")
+        monthly_goal = settings.get("monthly_goal", "goal")
+
+        last_read_book = settings.get("last_read_book", "book")
+
+        last_read_page = self.cursor.execute("""
+            SELECT pages_read 
+            FROM books 
+            WHERE book_name = :book
+        """, {
+            "book": last_read_book
+        }).fetchone()
+        last_read_page = str(last_read_page[0]) if last_read_page else "0"
+
+        information_label_text = self.get_text("information_label").format(
+            book=last_read_book,
+            page=last_read_page,
+        )
+
         self.widget_texts["information_label"] = ctk.CTkLabel(
             main_frame,
-            text=self.get_text("information_label"),
+            text=information_label_text,
             font=("Arial", 20)
         )
         self.widget_texts["information_label"].grid(row=3, column=1, columnspan=3, padx=20, pady=20, sticky="nsew")
+
+        today = datetime.now()
+        start_of_day = today.strftime("%Y-%m-%d 00:00:00")
+        
+        start_of_week_date = today - timedelta(days=today.weekday())
+        start_of_week = start_of_week_date.strftime("%Y-%m-%d 00:00:00")
+
+        start_of_month_date = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        start_of_month = start_of_month_date.strftime("%Y-%m-%d %H:%M:%S") 
+
+        daily_read_pages = self.calculate_pages_read(self.cursor, start_of_day)
+        weekly_read_pages = self.calculate_pages_read(self.cursor, start_of_week)
+        monthly_read_pages = self.calculate_pages_read(self.cursor, start_of_month)
+
+        self.widget_texts["daily_goal_progress"] = ctk.CTkLabel(
+            main_frame,
+            text=str(daily_read_pages) + "/" + str(daily_goal) + "\n\n" + self.get_text("daily_goal_label"),
+            font=("Arial", 15)
+        )
+        self.widget_texts["daily_goal_progress"].grid(row=4, column=1, padx=20, pady=20, sticky="nsew")
+
+        self.widget_texts["weekly_goal_progress"] = ctk.CTkLabel(
+            main_frame,
+            text=str(weekly_read_pages) + "/" + str(weekly_goal) + "\n\n" + self.get_text("weekly_goal_label"),
+            font=("Arial", 15)
+        )
+        self.widget_texts["weekly_goal_progress"].grid(row=4, column=2, padx=20, pady=20, sticky="nsew")
+
+        self.widget_texts["monthly_goal_progress"] = ctk.CTkLabel(
+            main_frame,
+            text=str(monthly_read_pages) + "/" + str(monthly_goal) + "\n\n" + self.get_text("monthly_goal_label"),
+            font=("Arial", 15)
+        )
+        self.widget_texts["monthly_goal_progress"].grid(row=4, column=3, padx=20, pady=20, sticky="nsew")
+
+    def calculate_pages_read(self, cursor, start_date):
+        query = """
+            SELECT pages_read
+            FROM reading_logs
+            WHERE date >= :start_date
+        """
+        rows = cursor.execute(query, {"start_date": start_date}).fetchall()
+        return sum(int(row[0]) for row in rows)
 
     def library_page(self):
         for widget in self.winfo_children():
@@ -455,7 +527,7 @@ class Library(ctk.CTk):
         self.conn.commit()
 
         messagebox.showinfo(
-             self.get_text("success_title"),
+            self.get_text("success_title"),
             self.get_text("note_success_message")
         )
     
@@ -778,12 +850,51 @@ class Library(ctk.CTk):
         )
         self.widget_texts["save_goals_button"].grid(row=8, column=0, padx=20, pady=20, sticky="w")
 
-        self.widget_texts["change_language_button"] = ctk.CTkButton(
+        self.widget_texts["language_label"] = ctk.CTkLabel(
             main_frame, 
-            text=self.get_text("change_language_button"), 
-            command=self.change_language
+            text=self.get_text("language_label"),
+            font=("Arial", 20)
         )
-        self.widget_texts["change_language_button"].grid(row=9, column=0, padx=20, pady=20, sticky="w")
+        self.widget_texts["language_label"].grid(row=9, column=0, padx=20, pady=20, sticky="w")
+
+        english_icon = PhotoImage(file=self.english_icon_path)
+        english_icon = english_icon.subsample(12, 12)
+
+        turkish_icon = PhotoImage(file=self.turkish_icon_path)
+        turkish_icon = turkish_icon.subsample(12, 12)
+
+        german_icon = PhotoImage(file=self.german_icon_path)
+        german_icon = german_icon.subsample(12, 12)
+
+        english_button = ctk.CTkButton(
+            main_frame, 
+            text="", 
+            image=english_icon,
+            command=lambda: self.change_language("en"),
+            fg_color="transparent",
+            hover=None
+        )
+        english_button.grid(row=9, column=1, padx=20, pady=20, sticky="w")
+
+        turkish_button = ctk.CTkButton(
+            main_frame, 
+            text="", 
+            image=turkish_icon,
+            command=lambda: self.change_language("tr"),
+            fg_color="transparent",
+            hover=None
+        )
+        turkish_button.grid(row=9, column=2, padx=20, pady=20, sticky="w")
+
+        german_button = ctk.CTkButton(
+            main_frame, 
+            text="", 
+            image=german_icon,
+            command=lambda: self.change_language("de"),
+            fg_color="transparent",
+            hover=None
+        )
+        german_button.grid(row=9, column=3, padx=20, pady=20, sticky="w")
 
     def add_pages_page(self):
         for widget in self.winfo_children():
@@ -794,13 +905,6 @@ class Library(ctk.CTk):
 
         center_frame = ctk.CTkFrame(self)
         center_frame.grid(row=0, column=0, padx=20, pady=20)
-
-        # header = ctk.CTkLabel(
-        #     center_frame,
-        #     text="Add Record",
-        #     font=("Arial", 24, "bold")
-        # )
-        # header.grid(row=0, column=0, columnspan=2, pady=20)
 
         validate_cmd = (center_frame.register(self.validate_input), "%P")
 
@@ -856,6 +960,15 @@ class Library(ctk.CTk):
                 "UPDATE books SET pages_read = pages_read + ? WHERE book_name = ?",
                 (pages_read, book_name)
             )
+
+            self.cursor.execute("""
+                INSERT INTO reading_logs (book_name, pages_read, date)
+                VALUES (:book_name, :pages_read, :date)
+            """, {
+                "book_name": book_name,
+                "pages_read": pages_read,
+                "date": datetime.now()
+            })
             self.conn.commit()
 
             try:
@@ -1054,11 +1167,8 @@ class Library(ctk.CTk):
 
         self.settings_page()
 
-    def change_language(self):
-        if self.language == 'en':
-                    self.language = 'tr'
-        else:
-            self.language = 'en'
+    def change_language(self, language):
+        self.language = language
 
         self.load_language(self.language)
         

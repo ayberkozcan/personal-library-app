@@ -5,7 +5,7 @@
         "stats_button": "Stats",
         "settings_button": "Settings",
         "page_question_label": "How many pages have you read today?",
-        "information_label": "Last time, you were on page x of the book x.",
+        "information_label": "Last time, you were on page {page} of {book}.",
 
         "pages_label": "Pages",
         "book_label": "Book",
@@ -57,7 +57,8 @@
         "goals_label": "Page Goals",
         "daily_goal_label": "Daily Goal",
         "weekly_goal_label": "Weekly Goal",
-        "change_language_button": "Change Language",
+        "monthly_goal_label": "Monthly Goal",
+        "language_label": "Language",
 
         "delete_note_title": "Delete Note",
         "delete_note_message": "Are you sure you want to delete this note?",
@@ -74,7 +75,7 @@
         "stats_button": "İstatistikler",
         "settings_button": "Ayarlar",
         "page_question_label": "Bugün kaç sayfa okudun?",
-        "information_label": "En son, x'in x. sayfasındaydın.",
+        "information_label": "En son, {book}'in {page}. sayfasındaydın.",
 
         "pages_label": "Sayfa",
         "book_label": "Kitap",
@@ -126,7 +127,8 @@
         "goals_label": "Sayfa Hedefleri",
         "daily_goal_label": "Günlük Hedef",
         "weekly_goal_label": "Haftalık Hedef",
-        "change_language_button": "Dil Değiştir",
+        "monthly_goal_label": "Aylık Hedef",
+        "language_label": "Dil",
 
         "delete_note_title": "Notu Sil",
         "delete_note_message": "Bu notu silmek istediğinizden emin misiniz?",
@@ -136,5 +138,75 @@
         "delete_book_message": "Bu kitabı silmek istediğinizden emin misiniz?",
         "delete_success_title": "Başarılı",
         "delete_success_message": "Kitap başarıyla silindi."
-    }
+    },
+    "de": {
+        "homepage_header": "Bibliothek",
+        "library_page_button": "Bibliothek",
+        "stats_button": "Statistiken",
+        "settings_button": "Einstellungen",
+        "page_question_label": "Wie viele Seiten hast du heute gelesen?",
+        "information_label": "Zuletzt warst du auf Seite {page} von {book}.",
+    
+        "pages_label": "Seiten",
+        "book_label": "Buch",
+        "save_record_button": "Eintrag hinzufügen",
+        "pages_added": " Seiten hinzugefügt!",
+    
+        "library_header": "Bibliothek",
+        "no_books_label": "Du hast kein Buch...",
+        "Name": "Name",
+        "Author": "Autor",
+        "Publication Year": "Erscheinungsjahr",
+        "Publisher": "Verlag",
+        "Genre": "Genre",
+        "Page Count": "Seitenanzahl",
+        "Pages Read": "Gelesene Seiten",
+        "Status": "Status",
+    
+        "notes_header": "Meine Notizen",
+        "note_title": "Titel",
+        "note_content": "Inhalt",
+        "note_tag": "Tag",
+        "save_button": "Speichern",
+        "note_save_button": "Notiz speichern",
+        "note_success_message": "Notiz wurde erfolgreich gespeichert.",
+    
+        "add_book_header": "Buch hinzufügen",
+        "save_book_button": "Speichern",
+        "back_button": "Zurück",
+        "error_title": "Ungültige Eingabe",
+        "error_publication_year": "Das Erscheinungsjahr muss eine gültige Ganzzahl sein.",
+        "error_isbn": "Die ISBN muss eine gültige Ganzzahl sein.",
+        "error_page_count": "Die Seitenanzahl muss eine gültige Ganzzahl sein.",
+        "success_title": "Erfolgreich",
+        "success_message": "Buch wurde erfolgreich gespeichert.",
+    
+        "stats_header": "Statistiken",
+    
+        "settings_header": "Einstellungen",
+        "homepage_button": "Startseite",
+        "set_theme_color_label": "Thema & Farbe",
+        "theme_label": "Thema",
+        "dark": "Dunkel",
+        "light": "Hell",
+        "system": "System",
+        "color_label": "Farbe",
+        "blue": "Blau",
+        "dark-blue": "Dunkelblau",
+        "green": "Grün",
+        "goals_label": "Seitenziele",
+        "daily_goal_label": "Tägliches Ziel",
+        "weekly_goal_label": "Wöchentliches Ziel",
+        "monthly_goal_label": "Monatliches Ziel",
+        "language_label": "Sprache",
+    
+        "delete_note_title": "Notiz löschen",
+        "delete_note_message": "Sind Sie sicher, dass Sie diese Notiz löschen möchten?",
+        "delete_note_success_message": "Notiz wurde erfolgreich gelöscht.",
+    
+        "delete_book_title": "Buch löschen",
+        "delete_book_message": "Sind Sie sicher, dass Sie dieses Buch löschen möchten?",
+        "delete_success_title": "Erfolgreich",
+        "delete_success_message": "Buch wurde erfolgreich gelöscht."
+    }    
 }
