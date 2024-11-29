@@ -19,3 +19,8 @@ Reading Progress Tracking
 Customizable Themes
 * Switch between light and dark modes for a personalized user experience.
 * Switch between english, turkish and german languages.
+
+## License
+Distributed under the GPL License. See LICENSE.txt for more information.
+
+All icons in this repository are taken from and belong to the site https://uxwing.com
