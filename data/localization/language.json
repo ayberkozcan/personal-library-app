@@ -43,6 +43,10 @@
         "success_message": "Book saved successfully.",
 
         "stats_header": "Stats",
+        "today": "Today",
+        "week": "This Week",
+        "month": "This Month",
+        "year": "This Year",
 
         "settings_header": "Settings",
         "homepage_button": "Back to Homepage",
@@ -114,6 +118,10 @@
         "success_message": "Kitap başarıyla kaydedildi.",
 
         "stats_header": "İstatistikler",
+        "today": "Bugün",
+        "week": "Bu Hafta",
+        "month": "Bu Ay",
+        "year": "Bu Yıl",
 
         "settings_header": "Ayarlar",
         "homepage_button": "Anasayfa",
@@ -185,6 +193,10 @@
         "success_message": "Buch wurde erfolgreich gespeichert.",
     
         "stats_header": "Statistiken",
+        "today": "Heute",
+        "week": "Diese Woche",
+        "month": "Diesen Monat",
+        "year": "Dieses Jahr",
     
         "settings_header": "Einstellungen",
         "homepage_button": "Startseite",

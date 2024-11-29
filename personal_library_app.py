@@ -116,17 +116,17 @@ class Library(ctk.CTk):
         main_frame = ctk.CTkFrame(self)
         main_frame.grid(row=0, column=0, sticky="nsew", padx=20, pady=20)
 
-        main_frame.grid_rowconfigure(0, weight=1)
-        main_frame.grid_rowconfigure(1, weight=1)
-        main_frame.grid_rowconfigure(2, weight=1)
-        main_frame.grid_rowconfigure(3, weight=3)
-        main_frame.grid_rowconfigure(4, weight=1)
+        for i in range(5):
+            if i == 3:
+                main_frame.grid_rowconfigure(i, weight=3)
+            else:
+                main_frame.grid_rowconfigure(i, weight=1)
 
-        main_frame.grid_columnconfigure(0, weight=1)
-        main_frame.grid_columnconfigure(1, weight=2)
-        main_frame.grid_columnconfigure(2, weight=2)
-        main_frame.grid_columnconfigure(3, weight=2)
-        main_frame.grid_columnconfigure(4, weight=2)
+        for i in range(5):
+            if i == 0:
+                main_frame.grid_columnconfigure(i, weight=1)
+            else:
+                main_frame.grid_columnconfigure(i, weight=2)
 
         self.widget_texts["homepage_header"] = ctk.CTkLabel(
             main_frame,
@@ -230,27 +230,31 @@ class Library(ctk.CTk):
         start_of_month_date = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
         start_of_month = start_of_month_date.strftime("%Y-%m-%d %H:%M:%S") 
 
-        daily_read_pages = self.calculate_pages_read(self.cursor, start_of_day)
-        weekly_read_pages = self.calculate_pages_read(self.cursor, start_of_week)
-        monthly_read_pages = self.calculate_pages_read(self.cursor, start_of_month)
+        start_of_year_date = today.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
+        start_of_year = start_of_year_date.strftime("%Y-%m-%d %H:%M:%S")
+
+        self.daily_read_pages = self.calculate_pages_read(self.cursor, start_of_day)
+        self.weekly_read_pages = self.calculate_pages_read(self.cursor, start_of_week)
+        self.monthly_read_pages = self.calculate_pages_read(self.cursor, start_of_month)
+        self.yearly_read_pages = self.calculate_pages_read(self.cursor, start_of_year)
 
         self.widget_texts["daily_goal_progress"] = ctk.CTkLabel(
             main_frame,
-            text=str(daily_read_pages) + "/" + str(daily_goal) + "\n\n" + self.get_text("daily_goal_label"),
+            text=str(self.daily_read_pages) + "/" + str(daily_goal) + "\n\n" + self.get_text("daily_goal_label"),
             font=("Arial", 15)
         )
         self.widget_texts["daily_goal_progress"].grid(row=4, column=1, padx=20, pady=20, sticky="nsew")
 
         self.widget_texts["weekly_goal_progress"] = ctk.CTkLabel(
             main_frame,
-            text=str(weekly_read_pages) + "/" + str(weekly_goal) + "\n\n" + self.get_text("weekly_goal_label"),
+            text=str(self.weekly_read_pages) + "/" + str(weekly_goal) + "\n\n" + self.get_text("weekly_goal_label"),
             font=("Arial", 15)
         )
         self.widget_texts["weekly_goal_progress"].grid(row=4, column=2, padx=20, pady=20, sticky="nsew")
 
         self.widget_texts["monthly_goal_progress"] = ctk.CTkLabel(
             main_frame,
-            text=str(monthly_read_pages) + "/" + str(monthly_goal) + "\n\n" + self.get_text("monthly_goal_label"),
+            text=str(self.monthly_read_pages) + "/" + str(monthly_goal) + "\n\n" + self.get_text("monthly_goal_label"),
             font=("Arial", 15)
         )
         self.widget_texts["monthly_goal_progress"].grid(row=4, column=3, padx=20, pady=20, sticky="nsew")
@@ -773,9 +777,17 @@ class Library(ctk.CTk):
         main_frame = ctk.CTkFrame(self)
         main_frame.grid(row=0, column=0, sticky="nsew", padx=20, pady=20)
 
-        main_frame.grid_rowconfigure(0, weight=0)
-        main_frame.grid_rowconfigure(1, weight=1)
-        main_frame.grid_columnconfigure(0, weight=1)
+        for i in range(9):
+            if i == 0:
+                main_frame.grid_rowconfigure(i, weight=0)
+            else:
+                main_frame.grid_rowconfigure(i, weight=2)
+
+        for i in range(10):
+            if i == 0:
+                main_frame.grid_columnconfigure(i, weight=1)
+            else:
+                main_frame.grid_columnconfigure(i, weight=2)
 
         self.widget_texts["stats_header"] = ctk.CTkLabel(
             main_frame,
@@ -795,6 +807,29 @@ class Library(ctk.CTk):
             command=self.homepage
         )
         self.widget_texts["homepage_button"].grid(row=0, column=1, padx=20, pady=20, sticky="ne")
+
+        self.create_label(main_frame, 1, 0, self.get_text("today") + ":", self.daily_read_pages)
+        self.create_label(main_frame, 2, 0, self.get_text("week") + ":", self.weekly_read_pages)
+        self.create_label(main_frame, 3, 0, self.get_text("month") + ":", self.monthly_read_pages)
+        self.create_label(main_frame, 4, 0, self.get_text("year") + ":", self.yearly_read_pages)
+
+        total_pages_read = self.cursor.execute("SELECT SUM(pages_read) FROM reading_logs").fetchone()[0]
+        self.create_label(main_frame, 5, 0, self.get_text("total") + ":", total_pages_read)
+
+    def create_label(self, main_frame, row, column, text, value):
+        label_text = ctk.CTkLabel(
+            main_frame,
+            text=text,
+            font=("Arial", 20)
+        )
+        label_value = ctk.CTkLabel(
+            main_frame,
+            text=str(value),
+            font=("Arial", 20)
+        )
+        
+        label_text.grid(row=row, column=column, padx=20, pady=20, sticky="w")
+        label_value.grid(row=row, column=column + 1, padx=20, pady=20, sticky="w")
 
     def settings_page(self):
         for widget in self.winfo_children():
