@@ -6,6 +6,9 @@ Book Management
 * Add, edit, and delete books in your collection.
 * Store detailed information about each book, including the author, genre, publication year, and page count.
 
+Note Management
+* Add, edit, and delete notes.
+
 Reading Progress Tracking
 * Track the number of pages read daily and analyze your progress.
 * Monitor the reading status of your books:
@@ -15,3 +18,4 @@ Reading Progress Tracking
 
 Customizable Themes
 * Switch between light and dark modes for a personalized user experience.
+* Switch between english, turkish and german languages.
