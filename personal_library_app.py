@@ -794,7 +794,7 @@ class Library(ctk.CTk):
             text=self.get_text("stats_header"),
             font=("Arial", 36, "bold")
         )
-        self.widget_texts["stats_header"].grid(row=0, column=0, padx=20, pady=20, sticky="nw")
+        self.widget_texts["stats_header"].grid(row=0, column=0, padx=20, pady=(20, 40), sticky="nw")
 
         homepage_icon = PhotoImage(file=self.homepage_icon_path)
         homepage_icon = homepage_icon.subsample(12, 12)
@@ -806,15 +806,27 @@ class Library(ctk.CTk):
             # text=self.get_text("homepage_button"),
             command=self.homepage
         )
-        self.widget_texts["homepage_button"].grid(row=0, column=1, padx=20, pady=20, sticky="ne")
+        self.widget_texts["homepage_button"].grid(row=0, column=9, padx=20, pady=(20, 40), sticky="ne")
 
-        self.create_label(main_frame, 1, 0, self.get_text("today") + ":", self.daily_read_pages)
-        self.create_label(main_frame, 2, 0, self.get_text("week") + ":", self.weekly_read_pages)
-        self.create_label(main_frame, 3, 0, self.get_text("month") + ":", self.monthly_read_pages)
-        self.create_label(main_frame, 4, 0, self.get_text("year") + ":", self.yearly_read_pages)
+        # Page Statistics
+        self.create_label(main_frame, 1, 0, self.get_text("page_stats"), "")
+
+        self.create_label(main_frame, 2, 0, self.get_text("today") + ":", self.daily_read_pages)
+        self.create_label(main_frame, 3, 0, self.get_text("week") + ":", self.weekly_read_pages)
+        self.create_label(main_frame, 4, 0, self.get_text("month") + ":", self.monthly_read_pages)
+        self.create_label(main_frame, 5, 0, self.get_text("year") + ":", self.yearly_read_pages)
 
         total_pages_read = self.cursor.execute("SELECT SUM(pages_read) FROM reading_logs").fetchone()[0]
-        self.create_label(main_frame, 5, 0, self.get_text("total") + ":", total_pages_read)
+        self.create_label(main_frame, 6, 0, self.get_text("total") + ":", total_pages_read)
+
+        # Library Statistics
+        self.create_label(main_frame, 1, 2, self.get_text("library_stats"), "")
+
+        favourite_genre = self.cursor.execute("SELECT genre FROM books GROUP BY genre ORDER BY COUNT(*) DESC LIMIT 1").fetchone()[0]
+        self.create_label(main_frame, 2, 2, self.get_text("favourite_genre") + ":", favourite_genre)
+
+        favourite_author = self.cursor.execute("SELECT author_name FROM books GROUP BY genre ORDER BY COUNT(*) DESC LIMIT 1").fetchone()[0]
+        self.create_label(main_frame, 3, 2, self.get_text("favourite_author") + ":", favourite_author)
 
     def create_label(self, main_frame, row, column, text, value):
         label_text = ctk.CTkLabel(
@@ -841,26 +853,19 @@ class Library(ctk.CTk):
         main_frame = ctk.CTkFrame(self)
         main_frame.grid(row=0, column=0, sticky="nsew", padx=20, pady=20)
 
-        main_frame.grid_rowconfigure(0, weight=0)
-        main_frame.grid_rowconfigure(1, weight=2)
-        main_frame.grid_rowconfigure(2, weight=1)
-        main_frame.grid_rowconfigure(3, weight=1)
-        main_frame.grid_rowconfigure(4, weight=2)
-        main_frame.grid_rowconfigure(5, weight=1)
-        main_frame.grid_rowconfigure(6, weight=1)
-        main_frame.grid_rowconfigure(7, weight=1)
-        main_frame.grid_rowconfigure(8, weight=1)
-        
-        main_frame.grid_columnconfigure(0, weight=1)
-        main_frame.grid_columnconfigure(1, weight=2)
-        main_frame.grid_columnconfigure(2, weight=2)
-        main_frame.grid_columnconfigure(3, weight=2)
-        main_frame.grid_columnconfigure(4, weight=2)
-        main_frame.grid_columnconfigure(5, weight=2)
-        main_frame.grid_columnconfigure(6, weight=2)
-        main_frame.grid_columnconfigure(7, weight=2)
-        main_frame.grid_columnconfigure(8, weight=2)
-        main_frame.grid_columnconfigure(9, weight=2)
+        for i in range(9):
+            if i == 0:
+                main_frame.grid_rowconfigure(i, weight=0)
+            elif i == 1 or i == 4:
+                main_frame.grid_rowconfigure(i, weight=2)
+            else:
+                main_frame.grid_rowconfigure(i, weight=1)
+
+        for i in range(10):
+            if i == 0:
+                main_frame.grid_columnconfigure(i, weight=1)
+            else:
+                main_frame.grid_columnconfigure(i, weight=2)
 
         self.widget_texts["settings_header"] = ctk.CTkLabel(
             main_frame,

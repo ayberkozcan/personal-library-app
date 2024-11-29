@@ -43,10 +43,15 @@
         "success_message": "Book saved successfully.",
 
         "stats_header": "Stats",
+        "page_stats": "Page Stats",
+        "library_stats": "Library Stats",
         "today": "Today",
         "week": "This Week",
         "month": "This Month",
         "year": "This Year",
+        "total": "Total",
+        "favourite_genre": "Favourite Genre",
+        "favourite_author": "Favourite Author",
 
         "settings_header": "Settings",
         "homepage_button": "Back to Homepage",
@@ -118,10 +123,15 @@
         "success_message": "Kitap başarıyla kaydedildi.",
 
         "stats_header": "İstatistikler",
+        "page_stats": "Sayfa İstatistikleri",
+        "library_stats": "Kütüphane İstatistikleri",
         "today": "Bugün",
         "week": "Bu Hafta",
         "month": "Bu Ay",
         "year": "Bu Yıl",
+        "total": "Toplam",
+        "favourite_genre": "Favori Tür",
+        "favourite_author": "Favori Yazar",
 
         "settings_header": "Ayarlar",
         "homepage_button": "Anasayfa",
@@ -193,10 +203,15 @@
         "success_message": "Buch wurde erfolgreich gespeichert.",
     
         "stats_header": "Statistiken",
+        "page_stats": "Seitenstatistiken",
+        "library_stats": "Bibliotheksstatistiken",
         "today": "Heute",
         "week": "Diese Woche",
         "month": "Diesen Monat",
         "year": "Dieses Jahr",
+        "total": "Gesamt",
+        "favourite_genre": "Lieblinggenre",
+        "favourite_author": "Lieblingsautor",
     
         "settings_header": "Einstellungen",
         "homepage_button": "Startseite",
