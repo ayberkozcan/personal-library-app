@@ -324,6 +324,7 @@ class Library(ctk.CTk):
         book_no_title.grid(row=0, column=0, padx=10, pady=5)
 
         indexes_to_pass = []
+        status_values = ["Ready to Start", "Reading", "Finished"]
 
         for i, title_name in enumerate(self.attributes):
             if title_name in ["Publication Year", "Publisher", "ISBN"]:
@@ -354,7 +355,21 @@ class Library(ctk.CTk):
                 for j, attribute in enumerate(book[1:], start=1):
                     if j-1 in indexes_to_pass:
                         continue
-                    attribute_label = ctk.CTkLabel(center_frame, text=attribute, font=("Arial", 12))
+
+                    book_name = book[1]
+                    if attribute in status_values:
+                        current_status = attribute
+
+                        def save_status_callback(selected_status, book_name=book_name):
+                            self.save_status(book_name, selected_status)
+
+                        attribute_label = ctk.CTkComboBox(
+                            center_frame, 
+                            values=status_values, 
+                            command=lambda selected_status, book_name=book_name: save_status_callback(selected_status, book_name))
+                        attribute_label.set(current_status)
+                    else:
+                        attribute_label = ctk.CTkLabel(center_frame, text=attribute, font=("Arial", 12))
                     attribute_label.grid(row=i, column=j, padx=10, pady=5)
 
                 edit_icon = PhotoImage(file=self.edit_icon_path)
@@ -403,6 +418,17 @@ class Library(ctk.CTk):
             hover=None
         )
         self.add_book_button.grid(row=2, column=0, sticky="sw", padx=20, pady=10)
+
+    def save_status(self, book_name, status):
+        print(book_name)
+        print(status)
+        self.cursor.execute(
+            "UPDATE books SET status = :status WHERE book_name = :book_name"
+            , {
+                "status": status,
+                "book_name": book_name
+            })
+        self.conn.commit()
 
     def edit_book_page(self, book_id):
         for widget in self.winfo_children():
